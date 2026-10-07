@@ -147,6 +147,11 @@ footer{font-size:12px;color:var(--muted);margin-top:16px}
 a{color:var(--accent)}
 .empty{padding:20px;text-align:center;color:var(--muted)}
 /* schedule / map / stations / pr */
+.tabs{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}
+.tabs a{flex:1 1 auto;text-align:center;text-decoration:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:9px 10px;font-size:14px;font-weight:800;min-width:0}
+.tabs a.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tabs a.sec{flex:0 1 auto;font-weight:600;font-size:13px;border-style:dashed}
+.tabs a.sec.on{border-style:solid}
 :root{--heat-hi:#d9f2e3;--heat-lo:#f6b8b8;--heat-ink:#0f172a;--rep-bg:#f1ecff;--rep-ink:#4b2a9b;--rep-line:#c5b5f2}
 @media (prefers-color-scheme:dark){:root{--heat-hi:#173a27;--heat-lo:#6b1f24;--heat-ink:#e6edf3;--rep-bg:#2a2140;--rep-ink:#d4c4ff;--rep-line:#5b4a8a}}
 .sched{display:flex;flex-direction:column;gap:8px}
@@ -272,7 +277,7 @@ const T2={
   sqFull:"5/5 PR",sqPart:"miembros PR conocidos",sqNA:"Escuadras no disponibles para esta tirada (no se consultaron: harían falta ~36 solicitudes extra).",
   improved:"Más mejorado",impNote:"Diferencia de % HOA (o HAA) entre la tirada más antigua y la más reciente; solo entradas completas. Las tiradas tienen distinta longitud (HOA 400 vs 500), por eso se compara el %.",
   impNA:"No se puede calcular todavía: hace falta que un tirador tenga resultados comparables en dos o más tiradas.",
-  perShoot:"Tiradores PR por tirada",classDist:"Distribución por clase (HOA)",noHOA:"Sin HOA",leader:"Clasificación por evento",
+  perShoot:"Tiradores PR por tirada",combTab:"Combinado",combTitle:"Combinado (entre tiradas)",combBanner:"Entre tiradas: compara o suma varias tiradas. Los destacados de cada tirada están en su propia pestaña.",uniq:"Tiradores PR distintos",inAll:"En todas las tiradas",mostMed:"Más medallas",medalsW:"medallas",noHOAnote:"«Sin HOA» = no tiró todos los eventos de la tirada.",repShort:"* = reportado por el tirador",classDist:"Distribución por clase (HOA)",noHOA:"Sin HOA",leader:"Clasificación por evento",
   pts:"pts",of2:"de"},
  en:{prTitle:"Puerto Rico",prNav:"Puerto Rico",sched:"Squad and field by day",schedNote:"Squad, day and time: the shooter's iSkeet detail page. Field: file name of the scoresheet uploaded to iSkeet, confirmed with the card photos. Days per the official program.",
   sq:"Squad",posn:"pos.",time:"Time",field:"Field",card:"Card",cardOk:"card matches",cardDiff:"card differs",fieldUnk:"field not published",
@@ -296,7 +301,7 @@ const T2={
   sqFull:"5/5 PR",sqPart:"PR members known",sqNA:"Squads unavailable for this shoot (not fetched: it would take ~36 extra requests).",
   improved:"Most improved",impNote:"Change in HOA % (else HAA %) from the oldest to the newest shoot; full-length entries only. The shoots differ in length (HOA 400 vs 500), so percentages are compared.",
   impNA:"Can't be derived yet: a shooter needs comparable results in two or more shoots.",
-  perShoot:"PR shooters per shoot",classDist:"Class distribution (HOA)",noHOA:"No HOA",leader:"Leaderboard per event",
+  perShoot:"PR shooters per shoot",combTab:"Combined",combTitle:"Combined (cross-shoot)",combBanner:"Cross-shoot: compares or adds up several shoots. Each shoot's own highlights are in its tab.",uniq:"Distinct PR shooters",inAll:"In every shoot",mostMed:"Most medals",medalsW:"medals",noHOAnote:"“No HOA” = did not shoot every event of the shoot.",repShort:"* = reported by shooter",classDist:"Class distribution (HOA)",noHOA:"No HOA",leader:"Leaderboard per event",
   pts:"pts",of2:"of"}};
 Object.assign(T.es,T2.es);Object.assign(T.en,T2.en);
 const EVN=k=>({PRELIM:t("prelim"),"12E":t("e12E"),"12W":t("e12W"),DBL:t("dbl"),"20":"20 ga","28":"28 ga","410":".410",WM:t("prelim")})[k]||k;
@@ -569,62 +574,81 @@ function bindTeam(){
 }
 function updateHints(){document.querySelectorAll(".tablewrap").forEach(w=>{const sc=w.querySelector(".scroll"),hn=w.querySelector(".hint");if(sc&&hn)hn.classList.toggle("on",sc.scrollWidth>sc.clientWidth+2);});}
 window.addEventListener("resize",updateHints);
-/* ---------------- PR page ---------------- */
+/* ---------------- PR page (one tab per shoot + cross-shoot "combined") ---------------- */
 function lbRow(i,name,sub,v,me){return `<div class="lbr${me?" me":""}"><span class="n">${i}</span><span class="nm">${esc(name)}${me?`<span class="youtag">${t("you")}</span>`:""}<small>${sub}</small></span><span class="v">${v}</span></div>`;}
 function rankList(rows,score){let prev=null,rk=0;return rows.map((r,i)=>{const k=score(r);if(k!==prev){rk=i+1;prev=k;}return [rk,r];});}
-function renderPR(){
-  const P=D.pr;if(!P||!P.shoots.length)return `<div class="card empty">${t("noField")}</div>`;
-  const nMed=P.people.reduce((a,p)=>a+p.gold+p.silver+p.bronze,0),nRepMed=P.people.reduce((a,p)=>a+p.rep_gold+p.rep_silver+p.rep_bronze,0);
-  const star=n=>n?`<sup title="${esc(t("reported"))}">*</sup>`:"";
-  let h=`<section class="card hero"><div class="lbl">${t("prSub")}</div><div class="big">${P.n_unique}<small> ${t("shooters")}</small></div>
-    <div class="stats"><div class="stat"><b>${P.shoots.length}</b><span>${t("shoots")}</span></div>
-    ${P.shoots.map(x=>`<div class="stat"><b>${x.n}</b><span>${esc(x.name)}</span></div>`).join("")}
-    <div class="stat"><b>${nMed}${star(nRepMed)}</b><span>${t("medalsN")}${nRepMed?` · *${t("incl")} ${nRepMed} ${t("repPlus")}`:""}</span></div></div></section>`;
-  // per shoot + class distribution
-  h+=`<section class="card"><h2>${t("perShoot")}</h2><div class="bars" style="margin:8px 0 12px">${P.shoots.map(x=>`<div class="brow"><span class="small">${esc(x.name.replace(/^2026 /,""))}</span><div class="barbg"><i style="width:${100*x.n/Math.max(...P.shoots.map(y=>y.n))}%"></i></div><b>${x.n} <span class="muted">/ ${x.field_n}</span></b></div>`).join("")}</div>
-    <h3>${t("classDist")}</h3>${P.shoots.map(x=>`<div class="small muted" style="margin:6px 0 4px">${esc(x.name)} · ${esc(fmtDate(x.start,x.end))}</div><div class="cd">${[...CLASSES,"–"].filter(c=>x.classes[c]).map(c=>`<span>${c==="–"?t("noHOA"):t("cls")+" "+c} <small>· ${x.classes[c]}</small></span>`).join("")}</div>`).join("")}</section>`;
-  // HOA / HAA top
-  const top=(key,title)=>{const rows=P.best[key]||[];return `<div><h3>${title}</h3><div class="lb">${rankList(rows,r=>r.pct).map(([k,r])=>lbRow(k,r.name,`${esc(r.shoot)}${r.c?" · "+t("cls")+" "+esc(r.c):""}`,`${r.b}<small>/${r.t} · ${fmtp(r.pct)}</small>`,r.nssa===D.nssa)).join("")||`<div class="muted small">–</div>`}</div></div>`;};
-  h+=`<section class="card"><div class="grid2">${top("HOA",t("hoaTop"))}${top("HAA",t("haaTop"))}</div><div class="note">${t("rankNote")}</div></section>`;
-  // best per gauge
-  h+=`<section class="card"><h2>${t("bestG")}</h2><div class="tiles">${["12","20","28","410","DBL"].map(g=>{const rows=P.best[g]||[];if(!rows.length)return "";const b=rows[0];const ties=rows.filter(r=>r.pct===b.pct);
-    return `<div class="tile"><div class="en">${esc(gname(g))}</div><div class="sc">${b.b}<small>/${b.t}</small></div><div class="pc">${fmtp(b.pct)}</div>${ties.map(r=>`<div class="small"><b>${esc(r.name)}</b>${r.nssa===D.nssa?`<span class="youtag">${t("you")}</span>`:""}<br><span class="muted">${esc(r.shoot)}</span></div>`).join("")}</div>`;}).join("")}</div></section>`;
-  // medal table
-  const M=P.people.filter(p=>p.awards.length);
-  h+=`<section class="card"><h2>${t("medals")}</h2><div class="mt" style="margin-top:8px"><span class="hd" style="text-align:left">${t("name")}</span><span class="hd"><i class="dot g"></i></span><span class="hd"><i class="dot s"></i></span><span class="hd"><i class="dot b"></i></span><span class="hd">${t("other")}</span>
+const star=n=>n?`<sup title="${esc(t("reported"))}">*</sup>`:"";
+function prTabs(P){const tabs=[...P.sections.map(x=>[x.slug,st.lang==="es"?x.tab_es:x.tab_en]),["combined",t("combTab")]];
+  return `<nav class="tabs" role="tablist" aria-label="${esc(t("prTitle"))}">${tabs.map(([k,l])=>`<a role="tab" href="#${k}" data-tab="${k}" aria-selected="${k===st.ptab}" class="${k===st.ptab?"on":""}${k==="combined"?" sec":""}">${esc(l)}</a>`).join("")}</nav>`;}
+function curTab(P){const h=(location.hash||"").replace(/^#/,"");const ok=[...P.sections.map(x=>x.slug),"combined"];return ok.includes(h)?h:P.sections[0].slug;}
+function medalTable(people,repFoot){const M=people.filter(p=>p.awards.length);if(!M.length)return `<div class="muted small">–</div>`;
+  return `<div class="mt" style="margin-top:8px"><span class="hd" style="text-align:left">${t("name")}</span><span class="hd"><i class="dot g"></i></span><span class="hd"><i class="dot s"></i></span><span class="hd"><i class="dot b"></i></span><span class="hd">${t("other")}</span>
     ${M.map(p=>`<span class="nm">${esc(p.name)}${p.nssa===D.nssa?`<span class="youtag">${t("you")}</span>`:""}</span><span class="ct">${p.gold||""}${star(p.rep_gold)}</span><span class="ct">${p.silver||""}${star(p.rep_silver)}</span><span class="ct">${p.bronze||""}${star(p.rep_bronze)}</span><span class="ct muted">${p.other||""}${star(p.rep_other)}</span>`).join("")}</div>
-    <div class="note">${t("medalNote")}</div>
-    ${P.people.some(p=>p.rep_n)?`<div class="note">${t("repFoot")}</div>`:""}<details style="margin-top:10px"><summary><b>${t("placements")}</b> (${M.length})</summary>${M.map(p=>`<div style="margin:8px 0"><b>${esc(p.name)}</b> <span class="muted small">${esc(p.city)}</span><div class="badges" style="margin-top:4px">${p.awards.map(a=>`<span title="${esc(a.shoot)} · ${esc(gname(a.event))}">${a.reported?`<span class="badge rep" title="${esc(t("reported"))}"><b>${esc(a.code)}*</b></span>`:badge(a.code,true)}</span><span class="muted small" style="align-self:center">${esc(gshort(a.event))} ${a.b}/${a.t} · ${esc(a.shoot.replace(/^2026 /,"").replace(/ CHAMPIONSHIPS?$/,""))}</span>`).join("")}</div></div>`).join("")}</details></section>`;
+    <div class="note">${t("medalNote")}</div>${people.some(p=>p.rep_n)?`<div class="note">${t("repFoot")}</div>`:""}
+    <details style="margin-top:10px"><summary><b>${t("placements")}</b> (${M.length})</summary>${M.map(p=>`<div style="margin:8px 0"><b>${esc(p.name)}</b> <span class="muted small">${esc(p.city)}</span><div class="badges" style="margin-top:4px">${p.awards.map(a=>`<span title="${esc(a.shoot)} · ${esc(gname(a.event))}">${a.reported?`<span class="badge rep" title="${esc(t("reported"))}"><b>${esc(a.code)}*</b></span>`:badge(a.code,true)}</span><span class="muted small" style="align-self:center">${esc(gshort(a.event))}${a.b!=null?" "+a.b+"/"+a.t:""}${repFoot?" · "+esc(a.shoot.replace(/^2026 /,"").replace(/ CHAMPIONSHIPS?$/,"")):""}</span>`).join("")}</div></div>`).join("")}</details>`;}
+function medalSum(people){return {m:people.reduce((a,p)=>a+p.gold+p.silver+p.bronze,0),r:people.reduce((a,p)=>a+p.rep_gold+p.rep_silver+p.rep_bronze,0),aw:people.reduce((a,p)=>a+p.awards.length,0),ra:people.reduce((a,p)=>a+p.rep_n,0)};}
+function renderPRSection(x){
+  const ms=medalSum(x.people),top=x.people.find(p=>p.awards.length);
+  let h=`<section class="card hero"><div class="lbl">${esc(x.name)} · ${esc(fmtDate(x.start,x.end))}</div><div class="big">${x.n}<small> ${t("shooters")} PR</small></div>
+    <div class="sub">${t("of2")} ${x.field_n} ${t("fieldOf")} · ${t("official")}</div>
+    <div class="stats"><div class="stat"><b>${x.best.HOA[0]?x.best.HOA[0].b:"–"}</b><span>${t("hoaTop")}${x.best.HOA[0]?" · "+esc(x.best.HOA[0].name):""}</span></div>
+    <div class="stat"><b>${x.best.HAA[0]?x.best.HAA[0].b:"–"}</b><span>${t("haaTop")}${x.best.HAA[0]?" · "+esc(x.best.HAA.filter(r=>r.b===x.best.HAA[0].b).map(r=>r.name).join(", ")):""}</span></div>
+    <div class="stat"><b>${ms.m}${star(ms.r)}</b><span>${t("medalsN")}${ms.r?` · *${t("incl")} ${ms.r} ${t("repPlus")}`:""}</span></div>
+    <div class="stat"><b>${ms.aw}${star(ms.ra)}</b><span>${t("awards")}</span></div></div></section>`;
+  // HOA / HAA top
+  const topL=(key,title)=>{const rows=x.best[key]||[];return `<div><h3>${title}</h3><div class="lb">${rankList(rows,r=>r.b).map(([k,r])=>lbRow(k,r.name,`${r.c?t("cls")+" "+esc(r.c):""}${r.aw.length?" · "+r.aw.map(esc).join(" "):""}`,`${r.b}<small>/${r.t} · ${fmtp(r.pct)}</small>`,r.nssa===D.nssa)).join("")||`<div class="muted small">–</div>`}</div></div>`;};
+  h+=`<section class="card"><div class="grid2">${topL("HOA",t("hoaTop"))}${topL("HAA",t("haaTop"))}</div></section>`;
+  // best per gauge
+  h+=`<section class="card"><h2>${t("bestG")}</h2><div class="tiles">${["12","20","28","410","DBL"].map(g=>{const rows=x.best[g]||[];if(!rows.length)return "";const b=rows[0];const ties=rows.filter(r=>r.b===b.b);
+    return `<div class="tile"><div class="en">${esc(gname(g))}</div><div class="sc">${b.b}<small>/${b.t}</small></div><div class="pc">${fmtp(b.pct)}</div>${ties.map(r=>`<div class="small"><b>${esc(r.name)}</b>${r.nssa===D.nssa?`<span class="youtag">${t("you")}</span>`:""}${r.c?` <span class="muted">· ${esc(r.c)}</span>`:""}</div>`).join("")}</div>`;}).join("")}</div></section>`;
+  // medals
+  h+=`<section class="card"><h2>${t("medals")}</h2>${top?`<div class="small" style="margin:2px 0 4px">${t("mostMed")}: <b>${esc(top.name)}</b>${top.nssa===D.nssa?`<span class="youtag">${t("you")}</span>`:""} · ${top.gold+top.silver+top.bronze}${star(top.rep_gold+top.rep_silver+top.rep_bronze)} ${t("medalsW")}</div>`:""}${medalTable(x.people,false)}</section>`;
   // best squad
   h+=`<section class="card"><h2>${t("bestSq")}</h2>`;
-  for(const x of P.shoots){h+=`<div class="small muted" style="margin:8px 0 4px"><b>${esc(x.name)}</b></div>`;
-    if(!x.squads.length){h+=`<div class="note" style="margin-top:0">${t("sqNA")}</div>`;continue;}
-    h+=`<div class="lb">`;
-    for(const g of ["12","20","28","410","DBL"]){const sq=x.squads.filter(z=>z.event===g).sort((a,b)=>(b.all_pr-a.all_pr)||(b.total-a.total));if(!sq.length)continue;
-      const full=sq.filter(z=>z.all_pr).sort((a,b)=>b.total-a.total),b=full[0]||sq[0];
+  if(!x.squads.length)h+=`<div class="note">${t("sqNA")}</div>`;
+  else{h+=`<div class="lb" style="margin-top:8px">`;
+    for(const g of ["12","20","28","410","DBL"]){const sq=x.squads.filter(z=>z.event===g);if(!sq.length)continue;
+      const full=sq.filter(z=>z.all_pr).sort((a,b)=>b.total-a.total),b=full[0]||[...sq].sort((a,b)=>b.n-a.n||b.total-a.total)[0];
       h+=lbRow(gshort(g),`${t("sq")} ${b.squad}`,`${b.members.map(m=>esc(m.name.split(" ").slice(-1)[0])+" "+m.b).join(" · ")} · ${b.all_pr?t("sqFull"):b.n+" "+t("sqPart")}`,`${b.total}<small>/${b.targets} · ${fmtp(100*b.total/b.targets)}</small>`,b.members.some(m=>m.nssa===D.nssa));}
-    h+=`</div>`;}
-  h+=`<div class="note">${t("sqNote")}</div></section>`;
-  // most improved
-  h+=`<section class="card"><h2>${t("improved")}</h2>`;
-  if(P.improved&&P.improved.length){h+=`<div class="lb" style="margin-top:8px">${P.improved.slice(0,8).map((r,i)=>lbRow(i+1,r.name,`${r.event}: ${r.first.b}/${r.first.t} (${esc(r.first.shoot.replace(/^2026 /,""))}) → ${r.last.b}/${r.last.t} (${esc(r.last.shoot.replace(/^2026 /,""))})`,`${r.delta>0?"+":""}${(Math.round(r.delta*10)/10).toLocaleString(st.lang==="es"?"es-PR":"en-US")} <small>${t("pts")}</small>`,r.nssa===D.nssa)).join("")}</div><div class="note">${t("impNote")}</div>`;}
-  else h+=`<div class="note">${t("impNA")}</div>`;
+    h+=`</div><div class="note">${t("sqNote")}</div>`;}
   h+=`</section>`;
+  // class distribution
+  h+=`<section class="card"><h2>${t("classDist")}</h2><div class="cd" style="margin-top:8px">${[...CLASSES,"–"].filter(c=>x.classes[c]).map(c=>`<span>${c==="–"?t("noHOA"):t("cls")+" "+c} <small>· ${x.classes[c]}</small></span>`).join("")}</div>${x.classes["–"]?`<div class="note">${t("noHOAnote")}</div>`:""}</section>`;
   // leaderboard per event
-  if(st.pshoot==null||st.pshoot>=P.shoots.length)st.pshoot=0;const x=P.shoots[st.pshoot];if(!x.events.includes(st.pev))st.pev=x.events.includes("HOA")?"HOA":x.events[0];
-  const full=x.meta[st.pev]?.full_shot;
+  if(!x.events.includes(st.pev))st.pev=x.events.includes("HOA")?"HOA":x.events[0];
+  const fullT=x.meta[st.pev]?.full_shot;
   const rows=x.shooters.filter(p=>p.ev[st.pev]).sort((a,b)=>b.ev[st.pev].b-a.ev[st.pev].b||a.name.localeCompare(b.name));
-  h+=`<section class="card" id="leader"><h2>${t("leader")}</h2><div class="controls" style="margin-top:8px"><div class="seg">${P.shoots.map((y,i)=>`<button class="btn" type="button" data-ps="${i}" aria-pressed="${i===st.pshoot}">${esc(y.name.replace(/^2026 /,""))}</button>`).join("")}</div>
-    <div class="seg">${x.events.map(g=>`<button class="btn" type="button" data-pe="${g}" aria-pressed="${g===st.pev}">${esc(gshort(g))}</button>`).join("")}</div></div>
-    <div class="lb" style="margin-top:10px">${rankList(rows,p=>p.ev[st.pev].t===full?p.ev[st.pev].b:-1-p.ev[st.pev].t).map(([k,p])=>{const e=p.ev[st.pev];const part=e.t!==full;
-      return lbRow(part?"·":k,p.name,`${esc(p.city)}${e.c?" · "+t("cls")+" "+esc(e.c):""}${(e.aw||[]).length?" · "+e.aw.map(esc).join(" "):""}`,`${e.b}<small>/${e.t}${part?"":" · "+fmtp(100*e.b/e.t)}</small>`,p.nssa===D.nssa);}).join("")}</div>
-    <div class="note">${esc(x.name)} · ${esc(gname(st.pev))} · ${rows.length} ${t("shooters")} · ${t("official")}</div></section>`;
+  const rep=(D.pr_reported||{})[x.shoot_id]||[];
+  h+=`<section class="card" id="leader"><h2>${t("leader")}</h2><div class="seg" style="margin-top:8px">${x.events.map(g=>`<button class="btn" type="button" data-pe="${g}" aria-pressed="${g===st.pev}">${esc(gshort(g))}</button>`).join("")}</div>
+    <div class="lb" style="margin-top:10px">${rankList(rows,p=>p.ev[st.pev].t===fullT?p.ev[st.pev].b:-1-p.ev[st.pev].t).map(([k,p])=>{const e=p.ev[st.pev];const part=e.t!==fullT;
+      const ra=p.nssa===D.nssa?(x.people.find(q=>q.nssa===p.nssa)?.awards||[]).filter(a=>a.reported&&a.event===st.pev).map(a=>esc(a.code)+"*"):[];
+      return lbRow(part?"·":k,p.name,`${esc(p.city)}${e.c?" · "+t("cls")+" "+esc(e.c):""}${(e.aw||[]).length||ra.length?" · "+[...(e.aw||[]).map(esc),...ra].join(" "):""}`,`${e.b}<small>/${e.t}${part?"":" · "+fmtp(100*e.b/e.t)}</small>`,p.nssa===D.nssa);}).join("")}</div>
+    <div class="note">${esc(gname(st.pev))} · ${rows.length} ${t("shooters")} · ${t("official")}${x.people.some(p=>p.rep_n)?" · "+t("repShort"):""}</div></section>`;
   return h;
 }
+function renderPRCombined(P){
+  const C=P.combined,ms=medalSum(C.people);
+  let h=`<section class="card"><div class="banner so" style="margin:0 0 10px">${t("combBanner")}</div><h2>${t("combTitle")}</h2>
+    <div class="stats" style="margin-top:10px">${[[C.n_unique,t("uniq")],[C.in_all,t("inAll")],[`${ms.m}${star(ms.r)}`,t("medalsN")],[`${ms.aw}${star(ms.ra)}`,t("awards")]].map(([v,l])=>`<div class="stat" style="background:var(--card2);border:1px solid var(--line)"><b>${v}</b><span style="color:var(--muted)">${esc(l)}</span></div>`).join("")}</div>
+    <h3 style="margin-top:14px">${t("perShoot")}</h3><div class="bars">${C.per_shoot.map(x=>`<div class="brow"><span class="small">${esc(P.sections.find(s=>s.slug===x.slug)[st.lang==="es"?"tab_es":"tab_en"])}</span><div class="barbg"><i style="width:${100*x.n/Math.max(...C.per_shoot.map(y=>y.n))}%"></i></div><b>${x.n} <span class="muted">/ ${x.field_n}</span></b></div>`).join("")}</div></section>`;
+  h+=`<section class="card"><h2>${t("improved")}</h2>`;
+  if(C.improved&&C.improved.length){h+=`<div class="lb" style="margin-top:8px">${C.improved.slice(0,8).map((r,i)=>lbRow(i+1,r.name,`${r.event}: ${r.first.b}/${r.first.t} (${esc(r.first.shoot.replace(/^2026 /,""))}) → ${r.last.b}/${r.last.t} (${esc(r.last.shoot.replace(/^2026 /,""))})`,`${r.delta>0?"+":""}${(Math.round(r.delta*10)/10).toLocaleString(st.lang==="es"?"es-PR":"en-US")} <small>${t("pts")}</small>`,r.nssa===D.nssa)).join("")}</div><div class="note">${t("impNote")}</div>`;}
+  else h+=`<div class="note">${t("impNA")}</div>`;
+  h+=`</section><section class="card"><h2>${t("medals")} · ${t("combTab")}</h2>${medalTable(C.people,true)}</section>`;
+  return h;
+}
+function renderPR(){
+  const P=D.pr;if(!P||!P.sections||!P.sections.length)return `<div class="card empty">${t("noField")}</div>`;
+  st.ptab=curTab(P);
+  const x=P.sections.find(s=>s.slug===st.ptab);
+  return prTabs(P)+(x?renderPRSection(x):renderPRCombined(P));
+}
 function bindPR(){
-  document.querySelectorAll("[data-ps]").forEach(b=>b.onclick=()=>{st.pshoot=+b.dataset.ps;render();document.getElementById("leader").scrollIntoView();});
+  document.querySelectorAll("[data-tab]").forEach(a=>a.onclick=e=>{e.preventDefault();const k=a.dataset.tab;
+    try{history.replaceState(null,"",location.pathname+location.search+"#"+k);}catch(_){location.hash=k;}st.pev=null;render();window.scrollTo(0,0);});
   document.querySelectorAll("[data-pe]").forEach(b=>b.onclick=()=>{st.pev=b.dataset.pe;render();document.getElementById("leader").scrollIntoView();});
 }
+window.addEventListener("hashchange",()=>{if(PAGE==="pr"){st.pev=null;render();}});
 
 function renderFoot(){
   const C=D.checked||[];
@@ -638,7 +662,7 @@ function render(){
   document.title=TT+(PAGE==="pr"?" · NSSA":" · NSSA "+D.nssa);
   document.getElementById("title").innerHTML=PAGE==="pr"?`${TT}<small>${t("prSub")}</small>`:`${TT}<small>${esc(D.shooter_name||"")} · ${t("sub")} ${esc(D.nssa)}</small>`;
   const lb=document.getElementById("langBtn");lb.textContent=st.lang==="es"?"English":"Español";
-  lb.onclick=()=>{st.lang=st.lang==="es"?"en":"es";setLang(st.lang);try{history.replaceState(null,"",location.pathname+"?lang="+st.lang);}catch(e){}render();};
+  lb.onclick=()=>{st.lang=st.lang==="es"?"en":"es";setLang(st.lang);try{history.replaceState(null,"",location.pathname+"?lang="+st.lang+location.hash);}catch(e){}render();};
   renderNav();
   document.getElementById("app").innerHTML=PAGE==="team"?renderTeam():PAGE==="pr"?renderPR():renderMe();
   if(PAGE==="team")bindTeam();if(PAGE==="pr")bindPR();
