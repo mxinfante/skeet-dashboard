@@ -43,7 +43,7 @@ header.top h1 small{display:block;font-size:12px;font-weight:500;color:var(--mut
 .hero .big small{font-size:18px;font-weight:600;color:var(--hero-muted)}
 .hero .sub{font-size:14px;color:var(--hero-muted)}
 .cards{display:grid;grid-template-columns:1fr;gap:12px}
-@media (min-width:700px){.cards{grid-template-columns:1fr 1fr}.hero .big{font-size:56px}}
+@media (min-width:700px){.cards{grid-template-columns:1fr 1fr}}@media (min-width:1000px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:700px){.hero .big{font-size:56px}}
 a.big-card{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow);min-height:150px;transition:border-color .15s,transform .15s}
 a.big-card:hover,a.big-card:focus-visible{border-color:var(--accent);transform:translateY(-1px);outline:none}
 a.big-card .ic{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);border:1px solid var(--accent-line);display:grid;place-items:center;color:var(--accent)}
@@ -67,17 +67,22 @@ a{color:var(--accent)}
     <a class="big-card" id="cardTeam" href="team/index.html">
       <span class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M2 20c1-3 3.5-5 6-5s5 2 6 5M12 20c1-3 3.5-5 6-5 1.5 0 3 .7 4 2"/></svg></span>
       <h2 id="teamH"></h2><p id="teamP"></p><div class="chips" id="teamChips"></div><span class="go" id="teamGo"></span></a>
+    <a class="big-card" id="cardPR" href="pr/index.html">
+      <span class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21V4"/><path d="M4 4h13l-2 4 2 4H4"/></svg></span>
+      <h2 id="prH"></h2><p id="prP"></p><div class="chips" id="prChips"></div><span class="go" id="prGo"></span></a>
   </div>
   <footer id="foot"></footer>
 </div>
 <script>
-const D={"nssa":"363581","season":"2026","shooter_name":"MICHAEL INFANTE","generated_at":"2026-10-07T08:54-04:00","shoots_count":2,"latest":{"name":"2026 MAIN WORLD CHAMPIONSHIPS","hoa":{"broke":467,"shot":500,"pct":93.4,"cls":"C","awards":["C3","RKRU"]},"haa":{"broke":554,"shot":600,"pct":92.33,"cls":"C","awards":["C2"]}},"team":[{"name":"2026 MAIN WORLD CHAMPIONSHIPS","state":"PR","team":22},{"name":"2026 KOLAR US OPEN","state":"PR","team":33}]};
+const D={"nssa":"363581","season":"2026","shooter_name":"MICHAEL INFANTE","generated_at":"2026-10-07T09:20-04:00","shoots_count":2,"latest":{"name":"2026 MAIN WORLD CHAMPIONSHIPS","hoa":{"broke":467,"shot":500,"pct":93.4,"cls":"C","awards":["C3","RKRU"]},"haa":{"broke":554,"shot":600,"pct":92.33,"cls":"C","awards":["C2"]}},"team":[{"name":"2026 MAIN WORLD CHAMPIONSHIPS","state":"PR","team":22},{"name":"2026 KOLAR US OPEN","state":"PR","team":33}],"pr_unique":42};
 const T={es:{title:"Estadísticas de skeet",latest:"Última tirada",me:"Mi tablero personal",meP:"HOA/HAA, puntuaciones por calibre, premios y tendencia de la temporada.",
  team:"Equipo / Campo",teamP:"Resultados del equipo de Puerto Rico y de todo el campo, por clase y concurrente.",go:"Abrir →",shoots:"tiradas",shooters:"tiradores",
- src:"Fuente: resultados finales de iskeet.org/shoot_reports",upd:"Actualizado"},
+ src:"Fuente: resultados finales de iskeet.org/shoot_reports",upd:"Actualizado",
+ pr:"Puerto Rico",prP:"Resumen de todos los tiradores de PR: HOA/HAA más altos, mejores por calibre, medallero, escuadras y clasificaciones.",prU:"tiradores PR distintos"},
  en:{title:"Skeet statistics",latest:"Latest shoot",me:"My personal dashboard",meP:"HOA/HAA, per-gauge scores, awards and season trend.",
  team:"Team / Field",teamP:"Puerto Rico team and whole-field results, by class and concurrent.",go:"Open →",shoots:"shoots",shooters:"shooters",
- src:"Source: final results from iskeet.org/shoot_reports",upd:"Updated"}};
+ src:"Source: final results from iskeet.org/shoot_reports",upd:"Updated",
+ pr:"Puerto Rico",prP:"Summary of every PR shooter: top HOA/HAA, best per gauge, medal table, squads and leaderboards.",prU:"distinct PR shooters"}};
 function getLang(){const q=new URLSearchParams(location.search).get("lang");if(q==="es"||q==="en"){try{localStorage.setItem("skeet_lang",q);}catch(e){}return q;}
   try{const l=localStorage.getItem("skeet_lang");if(l==="es"||l==="en")return l;}catch(e){}return "es";}
 let lang=getLang();
@@ -91,7 +96,9 @@ function render(){
     <div class="big">${L.hoa?L.hoa.broke:"–"}<small>/${L.hoa?L.hoa.shot:"–"} HOA</small></div>
     <div class="sub">HAA ${L.haa?`<b>${L.haa.broke}</b>/${L.haa.shot} · ${fmtp(L.haa.pct)}`:"–"} · ${D.shoots_count} ${t.shoots} ${esc(D.season)}</div>`:"";
   const q="?lang="+lang;
-  document.getElementById("cardMe").href="personal/index.html"+q;document.getElementById("cardTeam").href="team/index.html"+q;
+  document.getElementById("cardMe").href="personal/index.html"+q;document.getElementById("cardTeam").href="team/index.html"+q;document.getElementById("cardPR").href="pr/index.html"+q;
+  document.getElementById("prH").textContent=t.pr;document.getElementById("prP").textContent=t.prP;document.getElementById("prGo").textContent=t.go;
+  document.getElementById("prChips").innerHTML=`<span class="chip">${D.pr_unique||0} ${t.prU}</span><span class="chip">${(D.team||[]).length} ${t.shoots}</span>`;
   document.getElementById("meH").textContent=t.me;document.getElementById("meP").textContent=t.meP;
   document.getElementById("teamH").textContent=t.team;document.getElementById("teamP").textContent=t.teamP;
   document.getElementById("meGo").textContent=t.go;document.getElementById("teamGo").textContent=t.go;
