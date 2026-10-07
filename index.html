@@ -50,7 +50,7 @@ a.big-card .ic{width:44px;height:44px;border-radius:12px;background:var(--accent
 a.big-card h2{margin:4px 0 0;font-size:20px}
 a.big-card p{margin:0;color:var(--muted);font-size:14px}
 a.big-card .go{margin-top:auto;font-weight:700;color:var(--accent)}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;position:relative;z-index:1}
 .chip{background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:3px 9px;font-size:12px;font-weight:700}
 footer{font-size:12px;color:var(--muted);margin-top:16px}
 a{color:var(--accent)}
@@ -66,8 +66,6 @@ header.top h1{font-size:20px;letter-spacing:-.01em}
 .hero .art{position:absolute;z-index:0;right:-48px;top:-44px;width:230px;height:230px;opacity:.13;pointer-events:none;color:#fff}
 .hero .big{font-size:58px;letter-spacing:-.03em}
 .herogrid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
-.rings{display:flex;gap:8px}.ring{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--hero-muted);font-weight:700}
-svg.rg .bgc{stroke:currentColor;opacity:.18}svg.rg text{font-weight:800}
 a.big-card{border-radius:20px;padding:20px;position:relative;overflow:hidden}
 a.big-card::after{content:"";position:absolute;right:-30px;bottom:-30px;width:120px;height:120px;border-radius:50%;border:14px solid var(--accent-soft);pointer-events:none}
 a.big-card:hover,a.big-card:focus-visible{box-shadow:var(--shadow2)}
@@ -76,12 +74,41 @@ a.big-card .go{min-height:40px;display:flex;align-items:center}
 .hero,.big-card{animation:fu .35s ease both}.big-card+.big-card{animation-delay:.06s}
 @media (min-width:700px){.hero .art{width:340px;height:340px;right:-20px;top:-60px}}
 @media (prefers-reduced-motion:reduce){.hero,.big-card{animation:none}a.big-card{transition:none}}
+/* neutral landing (team-wide figures) */
+.herogrid{grid-template-columns:minmax(0,1fr) minmax(0,auto)}
+.hstats{display:flex;flex-direction:column;gap:8px}
+.hstat{background:var(--hero-tile);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:8px 12px;text-align:center;min-width:96px}
+.hstat b{display:block;font-size:26px;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums}
+.hstat span{font-size:11px;color:var(--hero-muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+section.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow);animation:fu .35s ease both}
+section.card h2{margin:0;font-size:18px}
+section.card .sub2{font-size:12px;color:var(--muted);margin-top:2px}
+.tops{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+@media (min-width:700px){.tops{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.top{background:var(--card2,var(--bg));border:1px solid var(--line);border-radius:14px;padding:10px 12px;position:relative;overflow:hidden;min-width:0}
+.top::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--gc,var(--accent))}
+.top .ev{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.top .sc{font-size:26px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}.top .sc small{font-size:14px;font-weight:600;color:var(--muted)}
+.top .pc{font-size:12px;color:var(--muted)}
+.top .who{font-size:13px;font-weight:700;margin-top:4px;overflow-wrap:anywhere}
+.sqbox{display:flex;align-items:center;gap:14px;margin-top:12px;flex-wrap:wrap}
+.sqbadge{width:64px;height:64px;border-radius:16px;background:var(--accent-soft);border:1px solid var(--accent-line);color:var(--accent);display:grid;place-items:center;text-align:center;font-weight:800;line-height:1.05;flex:0 0 auto}
+.sqbadge small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.04em}.sqbadge b{font-size:22px}
+.sqmain{min-width:0;flex:1 1 180px}.sqmain .sc{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}.sqmain .sc small{font-size:14px;color:var(--muted);font-weight:600}
+.cap{font-size:12px;color:var(--muted);margin-top:10px;border-left:3px solid var(--accent-line);padding:6px 10px;background:var(--accent-soft);border-radius:0 10px 10px 0}
+.kpis{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.kpi{background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:12px;padding:6px 10px;font-size:12px;font-weight:700;color:var(--muted)}
+.kpi b{font-size:18px;color:var(--ink);margin-right:3px;font-variant-numeric:tabular-nums}
+@media (min-width:900px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (prefers-reduced-motion:reduce){section.card{animation:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top"><h1 id="title"></h1><button class="btn" id="langBtn" type="button"></button></header>
   <section class="hero" id="hero"></section>
+  <section class="card" id="tops"></section>
+  <section class="card" id="squad"></section>
   <div class="cards">
     <a class="big-card" id="cardTeam" href="team/index.html">
       <span class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M2 20c1-3 3.5-5 6-5s5 2 6 5M12 20c1-3 3.5-5 6-5 1.5 0 3 .7 4 2"/></svg></span>
@@ -89,17 +116,30 @@ a.big-card .go{min-height:40px;display:flex;align-items:center}
     <a class="big-card" id="cardPR" href="pr/index.html">
       <span class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21V4"/><path d="M4 4h13l-2 4 2 4H4"/></svg></span>
       <h2 id="prH"></h2><p id="prP"></p><div class="chips" id="prChips"></div><span class="go" id="prGo"></span></a>
+    <div id="evCards" style="display:contents"></div>
   </div>
   <footer id="foot"></footer>
 </div>
 <script>
-const D={"nssa":"363581","season":"2026","shooter_name":"MICHAEL INFANTE","generated_at":"2026-10-07T09:20-04:00","shoots_count":1,"latest":{"name":"2026 MAIN WORLD CHAMPIONSHIPS","hoa":{"broke":467,"shot":500,"pct":93.4,"cls":"C","awards":["C3","RKRU"]},"haa":{"broke":554,"shot":600,"pct":92.33,"cls":"C","awards":["C2","RKRU"]}},"team":[{"name":"2026 MAIN WORLD CHAMPIONSHIPS","state":"PR","team":22}],"pr_unique":22};
-const T={es:{title:"Estadísticas de skeet",latest:"Última tirada", team:"Equipo / Campo",teamP:"Resultados del equipo de Puerto Rico y de todo el campo, por clase y concurrente.",go:"Abrir →",shoots:"tiradas",shooters:"tiradores",
+const D={"season":"2026","generated_at":"2026-10-07T09:20-04:00","main":[{"name":"2026 MAIN WORLD CHAMPIONSHIPS","tab_es":"Mundial 2026","tab_en":"Worlds 2026","start":"2026-09-28","end":"2026-10-03","href":"pr/index.html","n":22,"field_n":588,"squads_status":"22/22","awards":74,"medals":66,"top":[{"ev":"12","b":199,"t":200,"pct":99.5,"names":["ANDRE TORRENS"]},{"ev":"20","b":99,"t":100,"pct":99.0,"names":["LUIS CRESPO ORTIZ"]},{"ev":"28","b":97,"t":100,"pct":97.0,"names":["LUIS CRESPO ORTIZ"]},{"ev":"410","b":98,"t":100,"pct":98.0,"names":["CARLOS ABREU"]},{"ev":"DBL","b":96,"t":100,"pct":96.0,"names":["LUIS LOZADA"]},{"ev":"HOA","b":483,"t":500,"pct":96.6,"names":["LUIS CRESPO ORTIZ"]},{"ev":"HAA","b":575,"t":600,"pct":95.83,"names":["LUIS CRESPO ORTIZ","MARCELINO SOLA"]}],"squad":[{"event":"20","squad":"425","total":464,"targets":500,"n":5,"pct":92.8}]}],"events":[],"team":[{"name":"2026 MAIN WORLD CHAMPIONSHIPS","state":"PR","team":22}]};
+const T={es:{title:"Estadísticas de skeet",sub:"Tiradores de Puerto Rico · resultados finales de iSkeet",team:"Equipo / Campo",teamP:"Resultados del equipo de Puerto Rico y de todo el campo, por clase y concurrente.",go:"Abrir →",shooters:"tiradores",
  src:"Fuente: resultados finales de iskeet.org/shoot_reports",upd:"Actualizado",
- pr:"Puerto Rico",prP:"Resumen de todos los tiradores de PR: HOA/HAA más altos, mejores por calibre, medallero, escuadras y clasificaciones.",prU:"tiradores PR"},
- en:{title:"Skeet statistics",latest:"Latest shoot", team:"Team / Field",teamP:"Puerto Rico team and whole-field results, by class and concurrent.",go:"Open →",shoots:"shoots",shooters:"shooters",
+ pr:"Puerto Rico",prP:"Resumen de todos los tiradores de PR: HOA/HAA más altos, mejores por calibre, medallero, escuadras y clasificaciones.",prU:"tiradores PR",
+ prShooters:"tiradores PR",ofField:"de F en el campo",awards:"premios",medals:"medallas",
+ topsT:"Mejores marcas PR",topsSub:"Puntuación PR más alta por evento (entradas completas). Empates: se muestran todos.",
+ sqT:"Mejor escuadra PR",sqUnit:"Escuadra",sqAll:"5 de 5 tiradores PR",ev:{"12":"12 ga","20":"20 ga","28":"28 ga","410":".410",DBL:"Dobles",HOA:"HOA",HAA:"HAA"},
+ sqCap:"Definición: entre las escuadras de iSkeet cuyos 5 puestos son tiradores de PR, la de mayor puntuación combinada en un solo evento, medida en % de blancos (en 12 ga cada tirador tira 200; en los demás eventos, 100).",
+ sqNA:"Escuadras no disponibles.",sqNoIskeet:"T: iSkeet no publica escuadras, así que no entra en esta comparación.",sqTie:"empate",
+ evP:"Página aparte con los tiradores de PR de esta tirada.",months:["ene","feb","mar","abr","may","jun","jul","ago","sept","oct","nov","dic"]},
+ en:{title:"Skeet statistics",sub:"Puerto Rico shooters · iSkeet final results",team:"Team / Field",teamP:"Puerto Rico team and whole-field results, by class and concurrent.",go:"Open →",shooters:"shooters",
  src:"Source: final results from iskeet.org/shoot_reports",upd:"Updated",
- pr:"Puerto Rico",prP:"Summary of every PR shooter: top HOA/HAA, best per gauge, medal table, squads and leaderboards.",prU:"PR shooters"}};
+ pr:"Puerto Rico",prP:"Summary of every PR shooter: top HOA/HAA, best per gauge, medal table, squads and leaderboards.",prU:"PR shooters",
+ prShooters:"PR shooters",ofField:"of F in the field",awards:"awards",medals:"medals",
+ topsT:"Top PR scores",topsSub:"Highest PR score per event (full entries). Ties: all are shown.",
+ sqT:"Best PR squad",sqUnit:"Squad",sqAll:"5 of 5 PR shooters",ev:{"12":"12 ga","20":"20 ga","28":"28 ga","410":".410",DBL:"Doubles",HOA:"HOA",HAA:"HAA"},
+ sqCap:"Definition: among iSkeet squads whose 5 positions are all PR shooters, the one with the highest combined score in a single event, measured as a % of targets (in 12 ga each shooter shoots 200; in the other events, 100).",
+ sqNA:"Squads not available.",sqNoIskeet:"T: iSkeet does not publish squads, so it is not part of this comparison.",sqTie:"tie",
+ evP:"Separate page with this shoot's PR shooters.",months:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]}};
 function getLang(){const q=new URLSearchParams(location.search).get("lang");if(q==="es"||q==="en"){try{localStorage.setItem("skeet_lang",q);}catch(e){}return q;}
   try{const l=localStorage.getItem("skeet_lang");if(l==="es"||l==="en")return l;}catch(e){}return "es";}
 let lang=getLang();
@@ -107,26 +147,39 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 function heroArt(){
   const ridges=[...Array(12)].map((_,i)=>{const a=i*Math.PI/6,x1=120+34*Math.cos(a),y1=80+34*Math.sin(a),x2=120+58*Math.cos(a),y2=80+58*Math.sin(a);return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`;}).join("");
   return `<svg class="art" viewBox="0 0 200 200" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="3"><circle cx="120" cy="80" r="62"/><circle cx="120" cy="80" r="46"/><circle cx="120" cy="80" r="30" stroke-width="2"/><circle cx="120" cy="80" r="12" fill="currentColor"/>${ridges}<path d="M30 190 Q60 120 150 150" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round"/></g></svg>`;}
-function ring(p,sz,color,label){const r=sz/2-5,c=2*Math.PI*r,cx=sz/2,v=Math.max(0,Math.min(100,p||0));
-  return `<svg class="rg" width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" role="img" aria-label="${label} ${fmtp(p)}"><circle class="bgc" cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke-width="6"/><circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="${color}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(c*v/100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 ${cx} ${cx})"/><text x="${cx}" y="${cx+sz*.075}" text-anchor="middle" font-size="${Math.round(sz*.21)}" fill="currentColor">${(Math.round(p*10)/10).toLocaleString(lang==="es"?"es-PR":"en-US")}</text></svg>`;}
 let cuDone=false;function countUp(){if(cuDone||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches))return;cuDone=true;
   document.querySelectorAll("[data-cu]").forEach(el=>{const to=+el.dataset.cu;if(!(to>0))return;const t0=performance.now();const step=n=>{const k=Math.min(1,(n-t0)/700);el.textContent=Math.round(to*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(step);else el.textContent=to;};requestAnimationFrame(step);});}
 const fmtp=p=>p==null?"–":(Math.round(p*10)/10).toLocaleString(lang==="es"?"es-PR":"en-US",{minimumFractionDigits:1,maximumFractionDigits:1})+"%";
+const GC={"12":"#2f6fdb","20":"#e0a400","28":"#18a77a","410":"#e04f8f",DBL:"#8b6fd6",HOA:"#0a66c2",HAA:"#334155"};
+function fmtRange(a,b){const t=T[lang];if(!a)return "";const [y1,m1,d1]=a.split("-").map(Number),[y2,m2,d2]=(b||a).split("-").map(Number),M=t.months;
+  if(lang==="es")return m1===m2?`${d1}–${d2} ${M[m2-1]} ${y2}`:`${d1} ${M[m1-1]} – ${d2} ${M[m2-1]} ${y2}`;
+  return m1===m2?`${M[m1-1]} ${d1}–${d2}, ${y2}`:`${M[m1-1]} ${d1} – ${M[m2-1]} ${d2}, ${y2}`;}
+const tab=x=>lang==="es"?(x.tab_es||x.name):(x.tab_en||x.name);
+const nf=n=>Number(n).toLocaleString(lang==="es"?"es-PR":"en-US");
 function render(){
-  const t=T[lang];document.documentElement.lang=lang;document.title=t.title+" · NSSA "+D.nssa;
-  document.getElementById("title").innerHTML=`${t.title}<small>${esc(D.shooter_name||"")} · NSSA ${esc(D.nssa)}</small>`;
-  const L=D.latest;
-  document.getElementById("hero").innerHTML=L?`${heroArt()}<div class="lbl">${t.latest} · ${esc(L.name)}</div>
-    <div class="herogrid"><div><div class="big"><span data-cu="${L.hoa?L.hoa.broke:""}">${L.hoa?L.hoa.broke:"–"}</span><small>/${L.hoa?L.hoa.shot:"–"} HOA</small></div>
-    <div class="sub">HAA ${L.haa?`<b>${L.haa.broke}</b>/${L.haa.shot} · ${fmtp(L.haa.pct)}`:"–"}</div></div>
-    <div class="rings">${L.hoa&&L.hoa.pct!=null?`<div class="ring">${ring(L.hoa.pct,64,"#ffd166","HOA")}<span>HOA %</span></div>`:""}${L.haa&&L.haa.pct!=null?`<div class="ring">${ring(L.haa.pct,64,"#7fd1ff","HAA")}<span>HAA %</span></div>`:""}</div></div>`:"";
-  const q="?lang="+lang;
+  const t=T[lang];document.documentElement.lang=lang;document.title=t.title+" · Puerto Rico";
+  document.getElementById("title").innerHTML=`${t.title}<small>${t.sub}</small>`;
+  const W=(D.main||[])[0],q="?lang="+lang;
+  document.getElementById("hero").innerHTML=W?`${heroArt()}<div class="lbl">${esc(tab(W))} · ${esc(fmtRange(W.start,W.end))}</div>
+    <div class="herogrid"><div><div class="big"><span data-cu="${W.n}">${W.n}</span><small> ${t.prShooters}</small></div>
+    <div class="sub">${t.ofField.replace("F",nf(W.field_n))} · ${esc(W.name)}</div></div>
+    <div class="hstats"><div class="hstat"><b data-cu="${W.awards}">${W.awards}</b><span>${t.awards}</span></div><div class="hstat"><b data-cu="${W.medals}">${W.medals}</b><span>${t.medals}</span></div></div></div>`:"";
+  document.getElementById("tops").innerHTML=W&&W.top&&W.top.length?`<h2>${t.topsT} · ${esc(tab(W))}</h2><div class="sub2">${t.topsSub}</div>
+    <div class="tops">${W.top.map(x=>`<div class="top" style="--gc:${GC[x.ev]||"var(--accent)"}"><div class="ev">${esc(t.ev[x.ev]||x.ev)}</div><div class="sc">${x.b}<small>/${x.t}</small></div><div class="pc">${fmtp(x.pct)}</div>${x.names.map(n=>`<div class="who">${esc(n)}</div>`).join("")}</div>`).join("")}</div>`:"";
+  const S=W&&W.squad,noSq=(D.events||[]).filter(e=>e.squads_status==="not_iskeet").map(e=>t.sqNoIskeet.replace("T",esc(lang==="es"?e.title_es:e.title_en))).join(" ");
+  document.getElementById("squad").innerHTML=W?`<h2>${t.sqT} · ${esc(tab(W))}</h2>${S&&S.length?S.map(z=>`<div class="sqbox"><div class="sqbadge"><div><small>${t.sqUnit}</small><b>${esc(z.squad)}</b></div></div>
+    <div class="sqmain"><div class="ev small" style="font-weight:800;color:var(--muted)">${esc(t.ev[z.event]||z.event)}${S.length>1?" · "+t.sqTie:""}</div><div class="sc">${z.total}<small>/${z.targets} · ${fmtp(z.pct)}</small></div><div class="sub2">${t.sqAll}</div></div></div>`).join(""):`<div class="sub2">${t.sqNA}</div>`}
+    <div class="cap">${t.sqCap}${noSq?" "+noSq:""}</div>`:"";
   document.getElementById("cardTeam").href="team/index.html"+q;document.getElementById("cardPR").href="pr/index.html"+q;
   document.getElementById("prH").textContent=t.pr;document.getElementById("prP").textContent=t.prP;document.getElementById("prGo").textContent=t.go;
-  document.getElementById("prChips").innerHTML=`<span class="chip">${D.pr_unique||0} ${t.prU}</span>`;
+  document.getElementById("prChips").innerHTML=(D.main||[]).map(x=>`<span class="chip">${esc(tab(x))} · ${x.n} ${t.prU}</span>`).join("");
   document.getElementById("teamH").textContent=t.team;document.getElementById("teamP").textContent=t.teamP;
   document.getElementById("teamGo").textContent=t.go;
-  document.getElementById("teamChips").innerHTML=(D.team||[]).map(x=>`<span class="chip">${esc(x.name)} · ${x.team} ${t.shooters} ${esc(x.state)}</span>`).join("");
+  document.getElementById("teamChips").innerHTML=(D.main||[]).map(x=>`<span class="chip">${esc(tab(x))} · ${nf(x.field_n)} ${t.shooters}</span>`).join("");
+  document.getElementById("evCards").innerHTML=(D.events||[]).map((e,k)=>`<a class="big-card" id="cardEv${k}" href="${esc(e.href)}${q}">
+    <span class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></span>
+    <h2>${esc(lang==="es"?e.title_es:e.title_en)}</h2><p>${esc(fmtRange(e.start,e.end))} · ${t.evP}</p>
+    <div class="kpis"><span class="kpi"><b>${e.n}</b> ${t.prShooters}</span><span class="kpi"><b>${e.awards}</b> ${t.awards}</span><span class="kpi"><b>${e.medals}</b> ${t.medals}</span></div><span class="go">${t.go}</span></a>`).join("");
   document.getElementById("foot").innerHTML=`${t.src} · ${t.upd}: ${esc((D.generated_at||"").replace("T"," ").replace(/[+-]\d\d:\d\d$/,""))} AST`;
   const lb=document.getElementById("langBtn");lb.textContent=lang==="es"?"English":"Español";
   lb.onclick=()=>{lang=lang==="es"?"en":"es";try{localStorage.setItem("skeet_lang",lang);}catch(e){}history.replaceState(null,"",location.pathname+"?lang="+lang);render();};
