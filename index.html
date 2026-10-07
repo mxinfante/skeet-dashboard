@@ -71,13 +71,13 @@ a{color:var(--accent)}
   <footer id="foot"></footer>
 </div>
 <script>
-const D={"nssa":"363581","season":"2026","shooter_name":"MICHAEL INFANTE","generated_at":"2026-10-07T09:20-04:00","shoots_count":2,"latest":{"name":"2026 MAIN WORLD CHAMPIONSHIPS","hoa":{"broke":467,"shot":500,"pct":93.4,"cls":"C","awards":["C3","RKRU"]},"haa":{"broke":554,"shot":600,"pct":92.33,"cls":"C","awards":["C2"]}},"team":[{"name":"2026 MAIN WORLD CHAMPIONSHIPS","state":"PR","team":22},{"name":"2026 KOLAR US OPEN","state":"PR","team":33}],"pr_unique":42};
+const D={"nssa":"363581","season":"2026","shooter_name":"MICHAEL INFANTE","generated_at":"2026-10-07T09:20-04:00","shoots_count":1,"latest":{"name":"2026 MAIN WORLD CHAMPIONSHIPS","hoa":{"broke":467,"shot":500,"pct":93.4,"cls":"C","awards":["C3","RKRU"]},"haa":{"broke":554,"shot":600,"pct":92.33,"cls":"C","awards":["C2"]}},"team":[{"name":"2026 MAIN WORLD CHAMPIONSHIPS","state":"PR","team":22}],"pr_unique":22};
 const T={es:{title:"Estadísticas de skeet",latest:"Última tirada", team:"Equipo / Campo",teamP:"Resultados del equipo de Puerto Rico y de todo el campo, por clase y concurrente.",go:"Abrir →",shoots:"tiradas",shooters:"tiradores",
  src:"Fuente: resultados finales de iskeet.org/shoot_reports",upd:"Actualizado",
- pr:"Puerto Rico",prP:"Resumen de todos los tiradores de PR: HOA/HAA más altos, mejores por calibre, medallero, escuadras y clasificaciones.",prU:"tiradores PR distintos"},
+ pr:"Puerto Rico",prP:"Resumen de todos los tiradores de PR: HOA/HAA más altos, mejores por calibre, medallero, escuadras y clasificaciones.",prU:"tiradores PR"},
  en:{title:"Skeet statistics",latest:"Latest shoot", team:"Team / Field",teamP:"Puerto Rico team and whole-field results, by class and concurrent.",go:"Open →",shoots:"shoots",shooters:"shooters",
  src:"Source: final results from iskeet.org/shoot_reports",upd:"Updated",
- pr:"Puerto Rico",prP:"Summary of every PR shooter: top HOA/HAA, best per gauge, medal table, squads and leaderboards.",prU:"distinct PR shooters"}};
+ pr:"Puerto Rico",prP:"Summary of every PR shooter: top HOA/HAA, best per gauge, medal table, squads and leaderboards.",prU:"PR shooters"}};
 function getLang(){const q=new URLSearchParams(location.search).get("lang");if(q==="es"||q==="en"){try{localStorage.setItem("skeet_lang",q);}catch(e){}return q;}
   try{const l=localStorage.getItem("skeet_lang");if(l==="es"||l==="en")return l;}catch(e){}return "es";}
 let lang=getLang();
@@ -89,11 +89,11 @@ function render(){
   const L=D.latest;
   document.getElementById("hero").innerHTML=L?`<div class="lbl">${t.latest} · ${esc(L.name)}</div>
     <div class="big">${L.hoa?L.hoa.broke:"–"}<small>/${L.hoa?L.hoa.shot:"–"} HOA</small></div>
-    <div class="sub">HAA ${L.haa?`<b>${L.haa.broke}</b>/${L.haa.shot} · ${fmtp(L.haa.pct)}`:"–"} · ${D.shoots_count} ${t.shoots} ${esc(D.season)}</div>`:"";
+    <div class="sub">HAA ${L.haa?`<b>${L.haa.broke}</b>/${L.haa.shot} · ${fmtp(L.haa.pct)}`:"–"}</div>`:"";
   const q="?lang="+lang;
   document.getElementById("cardTeam").href="team/index.html"+q;document.getElementById("cardPR").href="pr/index.html"+q;
   document.getElementById("prH").textContent=t.pr;document.getElementById("prP").textContent=t.prP;document.getElementById("prGo").textContent=t.go;
-  document.getElementById("prChips").innerHTML=`<span class="chip">${D.pr_unique||0} ${t.prU}</span><span class="chip">${(D.team||[]).length} ${t.shoots}</span>`;
+  document.getElementById("prChips").innerHTML=`<span class="chip">${D.pr_unique||0} ${t.prU}</span>`;
   document.getElementById("teamH").textContent=t.team;document.getElementById("teamP").textContent=t.teamP;
   document.getElementById("teamGo").textContent=t.go;
   document.getElementById("teamChips").innerHTML=(D.team||[]).map(x=>`<span class="chip">${esc(x.name)} · ${x.team} ${t.shooters} ${esc(x.state)}</span>`).join("");
