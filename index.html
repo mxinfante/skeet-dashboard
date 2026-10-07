@@ -99,6 +99,8 @@ section.card .sub2{font-size:12px;color:var(--muted);margin-top:2px}
 .kpis{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .kpi{background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:12px;padding:6px 10px;font-size:12px;font-weight:700;color:var(--muted)}
 .kpi b{font-size:18px;color:var(--ink);margin-right:3px;font-variant-numeric:tabular-nums}
+.ewl{margin:0 0 14px;padding:10px 14px;border-radius:14px;background:var(--accent-soft);border:1px solid var(--accent-line);font-size:13.5px;line-height:1.45;color:var(--ink)}
+.ewl:empty{display:none}.ewl b{font-variant-numeric:tabular-nums}.ewl a{color:var(--accent);font-weight:700;white-space:nowrap}
 @media (min-width:900px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (prefers-reduced-motion:reduce){section.card{animation:none}}
 </style>
@@ -109,6 +111,7 @@ section.card .sub2{font-size:12px;color:var(--muted);margin-top:2px}
   <section class="hero" id="hero"></section>
   <section class="card" id="tops"></section>
   <section class="card" id="squad"></section>
+  <p class="ewl" id="ewl"></p>
   <div class="cards">
     <a class="big-card" id="cardTeam" href="team/index.html">
       <span class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M2 20c1-3 3.5-5 6-5s5 2 6 5M12 20c1-3 3.5-5 6-5 1.5 0 3 .7 4 2"/></svg></span>
@@ -121,25 +124,29 @@ section.card .sub2{font-size:12px;color:var(--muted);margin-top:2px}
   <footer id="foot"></footer>
 </div>
 <script>
-const D={"season":"2026","generated_at":"2026-10-07T09:20-04:00","main":[{"name":"2026 MAIN WORLD CHAMPIONSHIPS","tab_es":"Mundial 2026","tab_en":"Worlds 2026","start":"2026-09-28","end":"2026-10-03","href":"pr/index.html","n":22,"field_n":588,"squads_status":"22/22","awards":74,"medals":66,"top":[{"ev":"12","b":199,"t":200,"pct":99.5,"names":["ANDRE TORRENS"]},{"ev":"20","b":99,"t":100,"pct":99.0,"names":["LUIS CRESPO ORTIZ"]},{"ev":"28","b":97,"t":100,"pct":97.0,"names":["LUIS CRESPO ORTIZ"]},{"ev":"410","b":98,"t":100,"pct":98.0,"names":["CARLOS ABREU"]},{"ev":"DBL","b":96,"t":100,"pct":96.0,"names":["LUIS LOZADA"]},{"ev":"HOA","b":483,"t":500,"pct":96.6,"names":["LUIS CRESPO ORTIZ"]},{"ev":"HAA","b":575,"t":600,"pct":95.83,"names":["LUIS CRESPO ORTIZ","MARCELINO SOLA"]}],"squad":[{"event":"20","squad":"425","total":464,"targets":500,"n":5,"pct":92.8}]}],"events":[],"team":[{"name":"2026 MAIN WORLD CHAMPIONSHIPS","state":"PR","team":22}]};
+const D={"season":"2026","generated_at":"2026-10-07T09:20-04:00","stamp":{"res":"2026-10-07T09:20-04:00","ew":"2026-10-07T11:02-04:00","sc":"2026-10-07T12:04-04:00","data":"2026-10-07T12:04-04:00","built":"2026-10-07T13:09-04:00"},"flags":{"hoa_haa":false},"main":[{"name":"2026 MAIN WORLD CHAMPIONSHIPS","tab_es":"Mundial 2026","tab_en":"Worlds 2026","start":"2026-09-28","end":"2026-10-03","href":"pr/index.html","n":22,"field_n":588,"squads_status":"22/22","awards":74,"medals":66,"top":[{"ev":"12","b":199,"t":200,"pct":99.5,"names":["ANDRE TORRENS"]},{"ev":"20","b":99,"t":100,"pct":99.0,"names":["LUIS CRESPO ORTIZ"]},{"ev":"28","b":97,"t":100,"pct":97.0,"names":["LUIS CRESPO ORTIZ"]},{"ev":"410","b":98,"t":100,"pct":98.0,"names":["CARLOS ABREU"]},{"ev":"DBL","b":96,"t":100,"pct":96.0,"names":["LUIS LOZADA"]}],"squad":[{"event":"20","squad":"425","total":464,"targets":500,"n":5,"pct":92.8}],"ew":{"n":22,"e":91.6,"w":91.9,"aw":15}}],"events":[],"team":[{"name":"2026 MAIN WORLD CHAMPIONSHIPS","state":"PR","team":22}]};
 const T={es:{title:"Estadísticas de skeet",sub:"Tiradores de Puerto Rico · resultados finales de iSkeet",team:"Equipo / Campo",teamP:"Resultados del equipo de Puerto Rico y de todo el campo, por clase y concurrente.",go:"Abrir →",shooters:"tiradores",
  src:"Fuente: resultados finales de iSkeet, resultados de shoot-off confirmados por los tiradores y premios de 12 GA Este/Oeste calculados de las puntuaciones oficiales y el programa p.56.",upd:"Actualizado",
- pr:"Puerto Rico",prP:"Resumen de todos los tiradores de PR: HOA/HAA más altos, mejores por calibre, medallero, escuadras y clasificaciones.",prU:"tiradores PR",
+ pr:"Puerto Rico",prP:"Resumen de todos los tiradores de PR: HOA/HAA más altos, mejores por calibre, medallero, escuadras y clasificaciones.",prP0:"Resumen de todos los tiradores de PR: mejores por calibre, medallero, escuadras y clasificaciones.",
+ stData:"Datos actualizados",stBuilt:"Página generada",stRes:"resultados de iSkeet",stEW:"12 GA Este/Oeste",stSC:"hojas de puntuación",prU:"tiradores PR",
  prShooters:"tiradores PR",ofField:"de F en el campo",awards:"premios",medals:"medallas",
  topsT:"Mejores marcas PR",topsSub:"Puntuación PR más alta por evento (entradas completas). Empates: se muestran todos.",
  sqT:"Mejor escuadra PR",sqUnit:"Escuadra",sqAll:"5 de 5 tiradores PR",ev:{"12":"12 ga","20":"20 ga","28":"28 ga","410":".410",DBL:"Dobles",HOA:"HOA",HAA:"HAA"},
  sqCap:"Definición: entre las escuadras de iSkeet cuyos 5 puestos son tiradores de PR, la de mayor puntuación combinada en un solo evento, medida en % de blancos (en 12 ga cada tirador tira 200; en los demás eventos, 100).",
  sqNA:"Escuadras no disponibles.",sqNoIskeet:"T: iSkeet no publica escuadras, así que no entra en esta comparación.",sqTie:"empate",
- evP:"Página aparte con los tiradores de PR de esta tirada.",months:["ene","feb","mar","abr","may","jun","jul","ago","sept","oct","nov","dic"]},
+ evP:"Página aparte con los tiradores de PR de esta tirada.",
+ ewL:(n,e,w,a)=>`<b>12 GA Este / Oeste:</b> ${n} tiradores PR con ambas mitades · promedio Este <b>${e}</b> · Oeste <b>${w}</b> · <b>${a}</b> premios Este/Oeste`,ewGo:"Ver tabla →",months:["ene","feb","mar","abr","may","jun","jul","ago","sept","oct","nov","dic"]},
  en:{title:"Skeet statistics",sub:"Puerto Rico shooters · iSkeet final results",team:"Team / Field",teamP:"Puerto Rico team and whole-field results, by class and concurrent.",go:"Open →",shooters:"shooters",
  src:"Source: iSkeet final results, shooter-confirmed shoot-off results, and 12 GA East/West awards calculated from official scores and program p.56.",upd:"Updated",
- pr:"Puerto Rico",prP:"Summary of every PR shooter: top HOA/HAA, best per gauge, medal table, squads and leaderboards.",prU:"PR shooters",
+ pr:"Puerto Rico",prP:"Summary of every PR shooter: top HOA/HAA, best per gauge, medal table, squads and leaderboards.",prP0:"Summary of every PR shooter: best per gauge, medal table, squads and leaderboards.",
+ stData:"Data updated",stBuilt:"Page generated",stRes:"iSkeet results",stEW:"12 GA East/West",stSC:"score sheets",prU:"PR shooters",
  prShooters:"PR shooters",ofField:"of F in the field",awards:"awards",medals:"medals",
  topsT:"Top PR scores",topsSub:"Highest PR score per event (full entries). Ties: all are shown.",
  sqT:"Best PR squad",sqUnit:"Squad",sqAll:"5 of 5 PR shooters",ev:{"12":"12 ga","20":"20 ga","28":"28 ga","410":".410",DBL:"Doubles",HOA:"HOA",HAA:"HAA"},
  sqCap:"Definition: among iSkeet squads whose 5 positions are all PR shooters, the one with the highest combined score in a single event, measured as a % of targets (in 12 ga each shooter shoots 200; in the other events, 100).",
  sqNA:"Squads not available.",sqNoIskeet:"T: iSkeet does not publish squads, so it is not part of this comparison.",sqTie:"tie",
- evP:"Separate page with this shoot's PR shooters.",months:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]}};
+ evP:"Separate page with this shoot's PR shooters.",
+ ewL:(n,e,w,a)=>`<b>12 GA East / West:</b> ${n} PR shooters with both halves · East average <b>${e}</b> · West <b>${w}</b> · <b>${a}</b> East/West awards`,ewGo:"See table →",months:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]}};
 function getLang(){const q=new URLSearchParams(location.search).get("lang");if(q==="es"||q==="en"){try{localStorage.setItem("skeet_lang",q);}catch(e){}return q;}
   try{const l=localStorage.getItem("skeet_lang");if(l==="es"||l==="en")return l;}catch(e){}return "es";}
 let lang=getLang();
@@ -155,6 +162,13 @@ function fmtRange(a,b){const t=T[lang];if(!a)return "";const [y1,m1,d1]=a.split(
   if(lang==="es")return m1===m2?`${d1}–${d2} ${M[m2-1]} ${y2}`:`${d1} ${M[m1-1]} – ${d2} ${M[m2-1]} ${y2}`;
   return m1===m2?`${M[m1-1]} ${d1}–${d2}, ${y2}`:`${M[m1-1]} ${d1} – ${M[m2-1]} ${d2}, ${y2}`;}
 const tab=x=>lang==="es"?(x.tab_es||x.name):(x.tab_en||x.name);
+// ISO "YYYY-MM-DDTHH:MM-04:00" -> "7 oct 2026, 1:05 p.m. AST" (real timestamps from the build; 12-hour clock)
+function fmtClock(iso){const m=/^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)/.exec(iso||"");if(!m)return "";let h=+m[4];const ap=h<12?"a.m.":"p.m.";h=h%12||12;return `${h}:${m[5]} ${ap}`;}
+function fmtStamp(iso){const m=/^(\d{4})-(\d\d)-(\d\d)T/.exec(iso||"");if(!m)return "";
+  const d=new Date(+m[1],+m[2]-1,+m[3],12).toLocaleDateString(lang==="es"?"es-PR":"en-US",{day:"numeric",month:"short",year:"numeric"});return `${d}, ${fmtClock(iso)} AST`;}
+function stampLine(t){const S=D.stamp||{};if(!S.data)return `${t.upd}: ${fmtStamp(D.generated_at)}`;
+  const parts=[["stRes",S.res],["stEW",S.ew],["stSC",S.sc]].filter(x=>x[1]).map(([k,v])=>`${t[k]} ${(v||"").slice(0,10)===(S.data||"").slice(0,10)?fmtClock(v):fmtStamp(v).replace(/ AST$/,"")}`);
+  return `<span id="stamp">${t.stData}: ${fmtStamp(S.data)}${parts.length>1?` (${parts.join(" · ")})`:""} · ${t.stBuilt}: ${fmtStamp(S.built)}</span>`;}
 const nf=n=>Number(n).toLocaleString(lang==="es"?"es-PR":"en-US");
 function render(){
   const t=T[lang];document.documentElement.lang=lang;document.title=t.title+" · Puerto Rico";
@@ -170,8 +184,10 @@ function render(){
   document.getElementById("squad").innerHTML=W?`<h2>${t.sqT} · ${esc(tab(W))}</h2>${S&&S.length?S.map(z=>`<div class="sqbox"><div class="sqbadge"><div><small>${t.sqUnit}</small><b>${esc(z.squad)}</b></div></div>
     <div class="sqmain"><div class="ev small" style="font-weight:800;color:var(--muted)">${esc(t.ev[z.event]||z.event)}${S.length>1?" · "+t.sqTie:""}</div><div class="sc">${z.total}<small>/${z.targets} · ${fmtp(z.pct)}</small></div><div class="sub2">${t.sqAll}</div></div></div>`).join(""):`<div class="sub2">${t.sqNA}</div>`}
     <div class="cap">${t.sqCap}${noSq?" "+noSq:""}</div>`:"";
+  const E=W&&W.ew,n1=v=>Number(v).toLocaleString(lang==="es"?"es-PR":"en-US",{minimumFractionDigits:1,maximumFractionDigits:1});
+  document.getElementById("ewl").innerHTML=E?`${t.ewL(E.n,n1(E.e),n1(E.w),E.aw)} · <a href="pr/index.html${q}#eastwest">${t.ewGo}</a>`:"";
   document.getElementById("cardTeam").href="team/index.html"+q;document.getElementById("cardPR").href="pr/index.html"+q;
-  document.getElementById("prH").textContent=t.pr;document.getElementById("prP").textContent=t.prP;document.getElementById("prGo").textContent=t.go;
+  document.getElementById("prH").textContent=t.pr;document.getElementById("prP").textContent=(D.flags&&D.flags.hoa_haa)?t.prP:t.prP0;   // build flag LANDING_HOA_HAAdocument.getElementById("prGo").textContent=t.go;
   document.getElementById("prChips").innerHTML=(D.main||[]).map(x=>`<span class="chip">${esc(tab(x))} · ${x.n} ${t.prU}</span>`).join("");
   document.getElementById("teamH").textContent=t.team;document.getElementById("teamP").textContent=t.teamP;
   document.getElementById("teamGo").textContent=t.go;
@@ -180,7 +196,7 @@ function render(){
     <span class="ic" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></span>
     <h2>${esc(lang==="es"?e.title_es:e.title_en)}</h2><p>${esc(fmtRange(e.start,e.end))} · ${t.evP}</p>
     <div class="kpis"><span class="kpi"><b>${e.n}</b> ${t.prShooters}</span><span class="kpi"><b>${e.awards}</b> ${t.awards}</span><span class="kpi"><b>${e.medals}</b> ${t.medals}</span></div><span class="go">${t.go}</span></a>`).join("");
-  document.getElementById("foot").innerHTML=`${t.src} · ${t.upd}: ${esc((D.generated_at||"").replace("T"," ").replace(/[+-]\d\d:\d\d$/,""))} AST`;
+  document.getElementById("foot").innerHTML=`${t.src} · ${stampLine(t)}`;
   const lb=document.getElementById("langBtn");lb.textContent=lang==="es"?"English":"Español";
   lb.onclick=()=>{lang=lang==="es"?"en":"es";try{localStorage.setItem("skeet_lang",lang);}catch(e){}history.replaceState(null,"",location.pathname+"?lang="+lang);render();};
   countUp();
