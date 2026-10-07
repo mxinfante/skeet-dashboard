@@ -54,6 +54,28 @@ a.big-card .go{margin-top:auto;font-weight:700;color:var(--accent)}
 .chip{background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:3px 9px;font-size:12px;font-weight:700}
 footer{font-size:12px;color:var(--muted);margin-top:16px}
 a{color:var(--accent)}
+/* v2 */
+:root{--bg:#eef2f7;--card:#fff;--ink:#0d1726;--muted:#566275;--line:#dfe5ee;--accent:#1257b8;--accent-soft:#e8f0fc;--accent-line:#b8cff0;
+  --hero1:#0b4aa2;--hero2:#08264f;--hero3:#0f6fc9;--hero-muted:#cfe0f7;--shadow:0 1px 2px rgba(13,23,38,.05),0 6px 18px -6px rgba(13,23,38,.12);--shadow2:0 10px 30px -10px rgba(13,23,38,.35)}
+@media (prefers-color-scheme:dark){:root{--bg:#080c12;--card:#111821;--ink:#e8eef5;--muted:#9fabba;--line:#26313e;--accent:#6cb2ff;--accent-soft:#14263b;--accent-line:#2a4a70;
+  --hero1:#0e3466;--hero2:#071a33;--hero3:#14508f;--hero-muted:#b4c9e3;--shadow:0 1px 2px rgba(0,0,0,.5),0 8px 22px -10px rgba(0,0,0,.7);--shadow2:0 12px 30px -10px rgba(0,0,0,.8)}}
+header.top h1{font-size:20px;letter-spacing:-.01em}
+.btn{min-height:40px;padding:8px 14px;font-size:14px}
+.hero{position:relative;overflow:hidden;background:radial-gradient(120% 140% at 100% 0%,var(--hero3) 0%,transparent 55%),linear-gradient(140deg,var(--hero1),var(--hero2));border-radius:22px;padding:18px;box-shadow:var(--shadow2)}
+.hero>*{position:relative;z-index:1}
+.hero .art{position:absolute;z-index:0;right:-48px;top:-44px;width:230px;height:230px;opacity:.13;pointer-events:none;color:#fff}
+.hero .big{font-size:58px;letter-spacing:-.03em}
+.herogrid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+.rings{display:flex;gap:8px}.ring{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--hero-muted);font-weight:700}
+svg.rg .bgc{stroke:currentColor;opacity:.18}svg.rg text{font-weight:800}
+a.big-card{border-radius:20px;padding:20px;position:relative;overflow:hidden}
+a.big-card::after{content:"";position:absolute;right:-30px;bottom:-30px;width:120px;height:120px;border-radius:50%;border:14px solid var(--accent-soft);pointer-events:none}
+a.big-card:hover,a.big-card:focus-visible{box-shadow:var(--shadow2)}
+a.big-card .go{min-height:40px;display:flex;align-items:center}
+@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hero,.big-card{animation:fu .35s ease both}.big-card+.big-card{animation-delay:.06s}
+@media (min-width:700px){.hero .art{width:340px;height:340px;right:-20px;top:-60px}}
+@media (prefers-reduced-motion:reduce){.hero,.big-card{animation:none}a.big-card{transition:none}}
 </style>
 </head>
 <body>
@@ -71,7 +93,7 @@ a{color:var(--accent)}
   <footer id="foot"></footer>
 </div>
 <script>
-const D={"nssa":"363581","season":"2026","shooter_name":"MICHAEL INFANTE","generated_at":"2026-10-07T09:20-04:00","shoots_count":1,"latest":{"name":"2026 MAIN WORLD CHAMPIONSHIPS","hoa":{"broke":467,"shot":500,"pct":93.4,"cls":"C","awards":["C3","RKRU"]},"haa":{"broke":554,"shot":600,"pct":92.33,"cls":"C","awards":["C2"]}},"team":[{"name":"2026 MAIN WORLD CHAMPIONSHIPS","state":"PR","team":22}],"pr_unique":22};
+const D={"nssa":"363581","season":"2026","shooter_name":"MICHAEL INFANTE","generated_at":"2026-10-07T09:20-04:00","shoots_count":1,"latest":{"name":"2026 MAIN WORLD CHAMPIONSHIPS","hoa":{"broke":467,"shot":500,"pct":93.4,"cls":"C","awards":["C3","RKRU"]},"haa":{"broke":554,"shot":600,"pct":92.33,"cls":"C","awards":["C2","RKRU"]}},"team":[{"name":"2026 MAIN WORLD CHAMPIONSHIPS","state":"PR","team":22}],"pr_unique":22};
 const T={es:{title:"Estadísticas de skeet",latest:"Última tirada", team:"Equipo / Campo",teamP:"Resultados del equipo de Puerto Rico y de todo el campo, por clase y concurrente.",go:"Abrir →",shoots:"tiradas",shooters:"tiradores",
  src:"Fuente: resultados finales de iskeet.org/shoot_reports",upd:"Actualizado",
  pr:"Puerto Rico",prP:"Resumen de todos los tiradores de PR: HOA/HAA más altos, mejores por calibre, medallero, escuadras y clasificaciones.",prU:"tiradores PR"},
@@ -82,14 +104,22 @@ function getLang(){const q=new URLSearchParams(location.search).get("lang");if(q
   try{const l=localStorage.getItem("skeet_lang");if(l==="es"||l==="en")return l;}catch(e){}return "es";}
 let lang=getLang();
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function heroArt(){
+  const ridges=[...Array(12)].map((_,i)=>{const a=i*Math.PI/6,x1=120+34*Math.cos(a),y1=80+34*Math.sin(a),x2=120+58*Math.cos(a),y2=80+58*Math.sin(a);return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`;}).join("");
+  return `<svg class="art" viewBox="0 0 200 200" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="3"><circle cx="120" cy="80" r="62"/><circle cx="120" cy="80" r="46"/><circle cx="120" cy="80" r="30" stroke-width="2"/><circle cx="120" cy="80" r="12" fill="currentColor"/>${ridges}<path d="M30 190 Q60 120 150 150" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round"/></g></svg>`;}
+function ring(p,sz,color,label){const r=sz/2-5,c=2*Math.PI*r,cx=sz/2,v=Math.max(0,Math.min(100,p||0));
+  return `<svg class="rg" width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" role="img" aria-label="${label} ${fmtp(p)}"><circle class="bgc" cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke-width="6"/><circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="${color}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(c*v/100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 ${cx} ${cx})"/><text x="${cx}" y="${cx+sz*.075}" text-anchor="middle" font-size="${Math.round(sz*.21)}" fill="currentColor">${(Math.round(p*10)/10).toLocaleString(lang==="es"?"es-PR":"en-US")}</text></svg>`;}
+let cuDone=false;function countUp(){if(cuDone||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches))return;cuDone=true;
+  document.querySelectorAll("[data-cu]").forEach(el=>{const to=+el.dataset.cu;if(!(to>0))return;const t0=performance.now();const step=n=>{const k=Math.min(1,(n-t0)/700);el.textContent=Math.round(to*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(step);else el.textContent=to;};requestAnimationFrame(step);});}
 const fmtp=p=>p==null?"–":(Math.round(p*10)/10).toLocaleString(lang==="es"?"es-PR":"en-US",{minimumFractionDigits:1,maximumFractionDigits:1})+"%";
 function render(){
   const t=T[lang];document.documentElement.lang=lang;document.title=t.title+" · NSSA "+D.nssa;
   document.getElementById("title").innerHTML=`${t.title}<small>${esc(D.shooter_name||"")} · NSSA ${esc(D.nssa)}</small>`;
   const L=D.latest;
-  document.getElementById("hero").innerHTML=L?`<div class="lbl">${t.latest} · ${esc(L.name)}</div>
-    <div class="big">${L.hoa?L.hoa.broke:"–"}<small>/${L.hoa?L.hoa.shot:"–"} HOA</small></div>
-    <div class="sub">HAA ${L.haa?`<b>${L.haa.broke}</b>/${L.haa.shot} · ${fmtp(L.haa.pct)}`:"–"}</div>`:"";
+  document.getElementById("hero").innerHTML=L?`${heroArt()}<div class="lbl">${t.latest} · ${esc(L.name)}</div>
+    <div class="herogrid"><div><div class="big"><span data-cu="${L.hoa?L.hoa.broke:""}">${L.hoa?L.hoa.broke:"–"}</span><small>/${L.hoa?L.hoa.shot:"–"} HOA</small></div>
+    <div class="sub">HAA ${L.haa?`<b>${L.haa.broke}</b>/${L.haa.shot} · ${fmtp(L.haa.pct)}`:"–"}</div></div>
+    <div class="rings">${L.hoa&&L.hoa.pct!=null?`<div class="ring">${ring(L.hoa.pct,64,"#ffd166","HOA")}<span>HOA %</span></div>`:""}${L.haa&&L.haa.pct!=null?`<div class="ring">${ring(L.haa.pct,64,"#7fd1ff","HAA")}<span>HAA %</span></div>`:""}</div></div>`:"";
   const q="?lang="+lang;
   document.getElementById("cardTeam").href="team/index.html"+q;document.getElementById("cardPR").href="pr/index.html"+q;
   document.getElementById("prH").textContent=t.pr;document.getElementById("prP").textContent=t.prP;document.getElementById("prGo").textContent=t.go;
@@ -100,6 +130,7 @@ function render(){
   document.getElementById("foot").innerHTML=`${t.src} · ${t.upd}: ${esc((D.generated_at||"").replace("T"," ").replace(/[+-]\d\d:\d\d$/,""))} AST`;
   const lb=document.getElementById("langBtn");lb.textContent=lang==="es"?"English":"Español";
   lb.onclick=()=>{lang=lang==="es"?"en":"es";try{localStorage.setItem("skeet_lang",lang);}catch(e){}history.replaceState(null,"",location.pathname+"?lang="+lang);render();};
+  countUp();
 }
 render();
 </script>
