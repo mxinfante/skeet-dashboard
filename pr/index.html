@@ -748,7 +748,15 @@ function purseOf(g,e,size){const n=(e&&e.cls_of)||size||0;if(!e||!n)return 0;con
 function money(n){return n?`$${n.toLocaleString("en-US")}`:"–";}
 function purseParts(p){if(!p||!p.ev)return [];return ["12","20","28","410","DBL","HOA","HAA","WM"].map(g=>{const e=p.ev[g];const v=e?purseOf(g,e,classSize({shooters:[p]},g,e.c)):0;return v?{g,v}:null;}).filter(Boolean);}
 function purseTotal(p){return purseParts(p).reduce((s,x)=>s+x.v,0);}
-function purseLine(p){const parts=purseParts(p);const es=st.lang==="es";return (parts.map(x=>`${x.g==="410"?".410":x.g} ${money(x.v)}`).join(" · ")||(es?"sin bolsa de clase":"no class purse"))+(es?" · Concurrente: medalla. Bolsa opcional pág. 19 ($20 en 12, $10 en los demás, excepto HAA); iSkeet no trae quién la jugó.":" · Concurrent: medal. Optional purse p.19 ($20 on 12, $10 on the others, except HAA); iSkeet does not list who entered it.");}
+function concPlace(code){if(code.endsWith("CH"))return 1;if(code.endsWith("RU"))return 2;if(/3$|3RD/.test(code))return 3;return 0;}
+function concFee(g){return g==="12"?20:(g==="HAA"?0:10);}
+function concEst(p){const lows=[],highs=[];if(!p||!p.ev)return {lo:0,hi:0};
+  for(const [g,e] of Object.entries(p.ev)){const fee=concFee(g);if(!fee)continue;const places=(e.aw||[]).map(concPlace).filter(Boolean);const place=places.length?Math.min(...places):0;if(!place)continue;
+    lows.push(Math.round(25*fee*[0,50,30,20][place]/100));
+    highs.push(Math.round(120*fee*[0,24.5,23,14][place]/100));}
+  return {lo:lows.reduce((s,n)=>s+n,0),hi:highs.reduce((s,n)=>s+n,0)};}
+function purseLine(p){const parts=purseParts(p);const es=st.lang==="es";const c=concEst(p);const conc=c.hi?`${es?"Concurrente est.":"Concurrent est."} ${money(c.lo)}–${money(c.hi)}`:"";
+  return (parts.map(x=>`${x.g==="410"?".410":x.g} ${money(x.v)}`).join(" · ")||(es?"sin bolsa de clase":"no class purse"))+(conc?" · "+conc+(es?" (si jugó la opción, 25–120 inscritos)":" (if entered, 25–120 entries)"):"");}
 function ewOrder(){return ["E","W","T"].includes(st.ewsort)?st.ewsort:"E";}
 function ewSortSeg(){if(ewGauge()!=="12")return "";const s=ewOrder();const items=[["T",st.lang==="es"?"Total":"Total"],["E",t("ewE")],["W",t("ewW")]];
   return `<div class="seg ewseg">${items.map(([k,l])=>`<button type="button" class="btn" data-ewsort="${k}" aria-pressed="${s===k?"true":"false"}">${esc(l)}</button>`).join("")}</div>`;}
@@ -758,9 +766,9 @@ function purseBoard(x){const gs=[["12","12"],["20","20"],["28","28"],["410",".41
   const rows=(x.shooters||[]).map(p=>({p,tot:purseTotal(p)})).filter(r=>r.tot).sort((a,b)=>b.tot-a.tot||a.p.name.localeCompare(b.p.name));
   if(!rows.length)return "";
   const es=st.lang==="es";
-  return `<section class="card" id="bolsa"><h2>${es?"Bolsa total":"Purse total"}</h2><div class="muted small">${es?"Una sola tabla: clase, HOA y HAA. Concurrente es medalla; la bolsa opcional de la pág. 19 no está en iSkeet.":"One table: class, HOA and HAA. Concurrent is a medal; the p.19 optional purse is not in iSkeet."}</div>
-    <div class="tablewrap"><div class="hint">${t("swipe")}</div><div class="scroll"><table><thead><tr><th class="l">${t("name")}</th>${gs.map(([,l])=>`<th>${l}</th>`).join("")}<th>Total</th></tr></thead><tbody>
-    ${rows.map(r=>`<tr${isSel(r.p.nssa)?' class="sel"':""}><td class="l">${plink(r.p.nssa,r.p.name)}</td>${gs.map(([g])=>{const e=r.p.ev&&r.p.ev[g];const v=e?purseOf(g,e,classSize(x,g,e.c)):0;return `<td>${v?money(v):"–"}</td>`;}).join("")}<td><b>${money(r.tot)}</b></td></tr>`).join("")}
+  return `<section class="card" id="bolsa"><h2>${es?"Bolsa total":"Purse total"}</h2><div class="muted small">${es?"Clase, HOA y HAA son la bolsa fija. Concurrente est. asume que jugó la opción de la pág. 19 ($20 en 12, $10 en los demás, no HAA): bajo = 25 inscritos, alto = 120.":"One table: class, HOA and HAA. Concurrent is a medal; the p.19 optional purse is not in iSkeet."}</div>
+    <div class="tablewrap"><div class="hint">${t("swipe")}</div><div class="scroll"><table><thead><tr><th class="l">${t("name")}</th>${gs.map(([,l])=>`<th>${l}</th>`).join("")}<th>Total</th><th>${st.lang==="es"?"Conc. est.":"Conc. est."}</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr${isSel(r.p.nssa)?' class="sel"':""}><td class="l">${plink(r.p.nssa,r.p.name)}</td>${gs.map(([g])=>{const e=r.p.ev&&r.p.ev[g];const v=e?purseOf(g,e,classSize(x,g,e.c)):0;return `<td>${v?money(v):"–"}</td>`;}).join("")}<td><b>${money(r.tot)}</b></td><td>${(c=>c.hi?money(c.lo)+"–"+money(c.hi):"–")(concEst(r.p))}</td></tr>`).join("")}
     </tbody></table></div></div></section>`;}
 function ewTable(x){const g=ewGauge();
   if(g!=="12"){const R=(x.shooters||[]).filter(p=>p.ev&&p.ev[g]).sort((a,b)=>b.ev[g].b-a.ev[g].b||a.name.localeCompare(b.name));if(!R.length)return "";
