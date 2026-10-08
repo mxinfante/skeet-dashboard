@@ -518,13 +518,17 @@ function fmtDate(a,b){if(!a)return b||"";const o={day:"numeric",month:"short"},L
   return da.toLocaleDateString(L,o)+(db&&b!==a?" – "+db.toLocaleDateString(L,{...o,year:"numeric"}):", "+da.getFullYear());}
 function award(code){
   let m;
+  const es=t("conc")==="Concurrente";
+  const CN=es?{TS:"Triple Sub (18-39)",SU:"Sub-Sub Senior (40+)",SS:"Sub-Senior (50+)",SR:"Senior (60+)",VT:"Veterano (70+)",SV:"Senior Veteran (80+)",VV:"Super Veteran (90+)",RM:"Militar retirado",ML:"Militar",MV:"Veterano militar",LY:"Damas",SJ:"Sub-Junior",JR:"Junior",CL:"Colegial",FR:"Primer respondedor",WC:"Silla de ruedas",NO:"Novato",PC:"Padre e hijo","2M":"Dos personas"}:{TS:"Triple Sub (18-39)",SU:"Sub-Sub Senior (40+)",SS:"Sub-Senior (50+)",SR:"Senior (60+)",VT:"Veteran (70+)",SV:"Senior Veteran (80+)",VV:"Super Veteran (90+)",RM:"Retired military",ML:"Military",MV:"Military veteran",LY:"Lady",SJ:"Sub-Junior",JR:"Junior",CL:"Collegiate",FR:"First responder",WC:"Wheelchair",NO:"Novice",PC:"Parent-child","2M":"Two-person"};
+  const cname=c=>CN[c]||(es?"Concurrente "+c:"Concurrent "+c);
+  const ord=n=>es?`${n}.º`:(n%10===1&&n%100!==11?`${n}st`:n%10===2&&n%100!==12?`${n}nd`:n%10===3&&n%100!==13?`${n}rd`:`${n}th`);
   if(/^(CH|RU|3RD)$/.test(code)){const n={CH:1,RU:2,"3RD":3}[code];return{code,medal:n,label:[t("champ"),t("ru"),t("third")][n-1]};}
   if((m=code.match(/^(AAA|AA|A|B|C|D|E)(\d+)$/))){const n=+m[2];return{code,medal:n<=3?n:(n<=10?3:0),label:t("place")(n,m[1]),cls:m[1]};}   // medal tiers: program p. 18
-  if((m=code.match(/^([A-Z0-9]{2})(CH|RU|3RD|3)$/))){const n={CH:1,RU:2,"3RD":3,"3":3}[m[2]];return{code,medal:n,label:m[1]+" · "+[t("champ"),t("ru"),t("third")][n-1],conc:m[1]};}
-  if((m=code.match(/^([A-Z0-9]{2})(\d+)$/))){const g=code.match(/^[A-Z]{2}[12](10|[1-9])$/),n=g?({"1":1,"2":2}[g[1]]||0):0;return{code,medal:n,label:t("conc")+" "+m[1],conc:m[1]};}
+  if((m=code.match(/^([A-Z0-9]{2})(CH|RU|3RD|3)$/))){const n={CH:1,RU:2,"3RD":3,"3":3}[m[2]];return{code,medal:n,label:(CN[m[1]]||m[1])+" · "+[t("champ"),t("ru"),t("third")][n-1],conc:m[1]};}
+  if((m=code.match(/^([A-Z0-9]{2})([1-3])(\d+)$/))){const grp=+m[2],place=+m[3],medal=place<=3?place:(place<=10?3:0);return{code,medal,label:cname(m[1])+" · "+(es?`clase ${grp}`:`class ${grp}`)+" · "+ord(place),conc:m[1]};}
   return{code,medal:0,label:""};
 }
-function badge(code,compact){const a=award(code);const show=!compact&&a.label&&!a.cls;return `<span class="badge${a.medal?" m"+a.medal:""}" title="${esc(a.label)}"><b>${esc(code)}</b>${show?`<em>${esc(a.label)}</em>`:""}</span>`;}
+function badge(code,compact){const a=award(code);const show=a.label&&!a.cls&&(!compact||a.conc);return `<span class="badge${a.medal?" m"+a.medal:""}" title="${esc(code)} · ${esc(a.label)}"><b>${esc(code)}</b>${show?`<em>${esc(a.label)}</em>`:""}</span>`;}
 function placePill(aw,cls){const c=(aw||[]).map(award).find(a=>a.cls);if(c)return `<span class="pill place">${esc(c.label)}</span>`;
   return cls?`<span class="pill place">${t("cls")} ${esc(cls)}</span>`:"";}
 const plusRep=n=>`${n}`;
