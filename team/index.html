@@ -738,7 +738,7 @@ function ewTable(x){const g=ewGauge();
     const lab=gname(g);
     return `<section class="card" id="eastwest"><h2>${esc(lab)}</h2>${ewSeg()}<div class="muted small">${esc(lab)}</div><div class="ewt g5" role="table" aria-label="${esc(lab)}">
     <span class="hd nm">${t("name")}</span><span class="hd">${t("ewCls")}</span><span class="hd">${t("pts")}</span><span class="hd">${t("pos")}</span><span class="hd aw">${t("ewAwH")}</span>
-    ${R.map(p=>{const e=p.ev[g],sl=isSel(p.nssa),c=sl?" sel":"",a=selA(p.nssa);const place=e.r?`${e.r} ${t("of")} ${e.of||"–"}`:"–";
+    ${R.map(p=>{const e=p.ev[g],sl=isSel(p.nssa),c=sl?" sel":"",a=selA(p.nssa);const place=e.r?(e.of?`${e.r} ${t("of")} ${e.of}`:String(e.r)):"–";
       return `<span class="nm${c}"${a}>${plink(p.nssa,p.name)}</span><span class="cl${c}"${a}>${esc(e.c||"–")}</span><span class="n${c}"${a}><b>${e.b}</b><small>/${e.t}</small></span><span class="n${c}"${a}><b>${esc(place)}</b></span><span class="aw${c}"${a}>${(e.aw||[]).map(code=>badge(code,true)).join("")}</span>`;}).join("")}</div>
     <div class="note">${esc(lab)}. ${t("srcAll")}</div></section>`;}
   const R=(x.shooters||[]).filter(p=>p.ew).sort((a,b)=>b.ew[0]-a.ew[0]||b.ew[1]-a.ew[1]||a.name.localeCompare(b.name));if(!R.length)return "";
