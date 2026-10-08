@@ -327,10 +327,11 @@ svg.hist .b0{fill:var(--bar-bg)}
 svg.hist .b1{fill:var(--accent)}
 svg.hist text{fill:var(--muted);font-size:10px;font-weight:600}
 svg.hist .selm{fill:var(--ink)}
-.ewt{display:grid;grid-template-columns:minmax(0,1fr) 40px 74px 74px minmax(84px,auto) 52px;gap:0;margin-top:8px;font-variant-numeric:tabular-nums;max-width:720px}
-.ewt.g5{grid-template-columns:minmax(108px,1.6fr) 32px 56px 46px minmax(0,1fr);max-width:none}
-.ewt.g5>.nm,.ewt.g5>.nm a{white-space:normal;overflow-wrap:anywhere;line-height:1.25}
-.ewt.g5 .badge em{display:none}
+.ewt{display:grid;grid-template-columns:168px 34px 72px 72px minmax(0,1fr) 48px 64px;gap:0;margin-top:8px;font-variant-numeric:tabular-nums;max-width:none;overflow-x:auto}
+.ewt>.nm,.ewt>.nm a{white-space:nowrap}
+.ewt.g5{grid-template-columns:168px 34px 64px 52px minmax(0,1fr) 64px;max-width:none}
+.ewt.g5>.nm,.ewt.g5>.nm a{white-space:nowrap}
+.ewt .badge em{display:none}
 .ewseg{margin:8px 0 4px}
 .ewt>.hd{white-space:nowrap}.ewt>.cl{text-align:center;font-weight:700;color:var(--muted)}.ewt>.hd:nth-child(2){text-align:center}
 .ewt>.n b{display:block}.ewt>.n small{display:block;font-size:11px;font-weight:600;color:var(--muted)}
@@ -737,6 +738,10 @@ function ewTile(ew,ewa,ev){const g=ewGauge();
   if(!ew)return "";const ch=ewChips(ewa);
   return `<div class="tile ew" style="--gc:${gc("12")}"><div class="en">${esc(t("ewT"))}</div><div class="sc" style="white-space:nowrap">${ew[0]} <small>·</small> ${ew[1]}</div><div class="pc">${t("ewE")} · ${t("ewW")} (${t("of2")} 100)</div>${ch?`<div class="badges">${ch}</div>`:""}<div class="rank">${t("ewTileN")}</div>${ewSeg()}</div>`;}
 function ewPl(x,k){const v=x&&x[k];return v?(st.lang==="es"?`${v[0]}.º/${v[1]}`:`${ord(v[0])}/${v[1]}`):t("ewNI");}
+function purseBands(n){const rows=[[12,[100]],[24,[60,40]],[36,[50,30,20]],[48,[39,30,20,11]],[60,[35,28,18,10,9]],[72,[32,27,17,9,8,7]],[84,[30.5,26,16,9,7,6,5.5]],[96,[28.5,25,15,8.5,6.5,6,5.5,5]],[108,[27.5,24.5,15,8,6,5.5,5,4.5,4]],[1e9,[24.5,23,14,7,6.5,6,5.5,5,4.5,4]]];for(const [max,pct] of rows)if(n<=max)return pct;return [];}
+function classPlace(e){const c=((e.aw||[]).map(award).find(a=>a.cls)||{}).code||"";const n=+String(c).replace(/\D/g,"");return n||e.rc||0;}
+function purseOf(g,e){if(!e||!e.cls_of)return 0;const per={12:11,20:7,28:7,410:7,DBL:7,HOA:10,HAA:10,WM:7}[g]||0;const open={12:[1000,650,450],20:[800,600,400],28:[800,600,400],410:[800,600,400],DBL:[800,600,400],HOA:[1500,1250,1000],HAA:[1500,1250,1000],WM:[800,600,400]}[g];const pct=(purseBands(e.cls_of)[classPlace(e)-1]||0);let m=per*e.cls_of*pct/100;const top=(e.aw||[]).find(c=>/^(CH|RU|3RD)$/.test(c));if(top&&open)m+=open[{CH:0,RU:1,"3RD":2}[top]];return Math.round(m);}
+function money(n){return n?`$${n.toLocaleString("en-US")}`:"–";}
 function ewOrder(){return ["E","W","T"].includes(st.ewsort)?st.ewsort:"E";}
 function ewSortSeg(){if(ewGauge()!=="12")return "";const s=ewOrder();const items=[["T",st.lang==="es"?"Total":"Total"],["E",t("ewE")],["W",t("ewW")]];
   return `<div class="seg ewseg">${items.map(([k,l])=>`<button type="button" class="btn" data-ewsort="${k}" aria-pressed="${s===k?"true":"false"}">${esc(l)}</button>`).join("")}</div>`;}
@@ -746,16 +751,16 @@ function ewTable(x){const g=ewGauge();
   if(g!=="12"){const R=(x.shooters||[]).filter(p=>p.ev&&p.ev[g]).sort((a,b)=>b.ev[g].b-a.ev[g].b||a.name.localeCompare(b.name));if(!R.length)return "";
     const lab=gname(g);
     return `<section class="card" id="eastwest"><h2>${esc(lab)}</h2>${ewSeg()}<div class="muted small">${esc(lab)}</div><div class="ewt g5" role="table" aria-label="${esc(lab)}">
-    <span class="hd nm">${t("name")}</span><span class="hd">${t("ewCls")}</span><span class="hd">${t("pts")}</span><span class="hd">${t("pos")}</span><span class="hd aw">${t("ewAwH")}</span>
+    <span class="hd nm">${t("name")}</span><span class="hd">${t("ewCls")}</span><span class="hd">${t("pts")}</span><span class="hd">${t("pos")}</span><span class="hd aw">${t("ewAwH")}</span><span class="hd">$</span>
     ${R.map(p=>{const e=p.ev[g],sl=isSel(p.nssa),c=sl?" sel":"",a=selA(p.nssa);const place=e.r?(e.of?`${e.r} ${t("of")} ${e.of}`:String(e.r)):"–";
-      return `<span class="nm${c}"${a}>${plink(p.nssa,p.name)}</span><span class="cl${c}"${a}>${esc(e.c||"–")}</span><span class="n${c}"${a}><b>${e.b}</b><small>/${e.t}</small></span><span class="n${c}"${a}><b>${esc(place)}</b></span><span class="aw${c}"${a}>${(e.aw||[]).map(code=>badge(code,true).replace(/<em>[^<]*<\/em>/g,"")).join("")}</span>`;}).join("")}</div>
-    <div class="note">${esc(lab)}. ${t("srcAll")}</div></section>`;}
+      return `<span class="nm${c}"${a}>${plink(p.nssa,p.name)}</span><span class="cl${c}"${a}>${esc(e.c||"–")}</span><span class="n${c}"${a}><b>${e.b}</b><small>/${e.t}</small></span><span class="n${c}"${a}><b>${esc(place)}</b></span><span class="aw${c}"${a}>${(e.aw||[]).map(code=>badge(code,true).replace(/<em>[^<]*<\/em>/g,"")).join("")}</span><span class="n${c}"${a}><b>${money(purseOf(g,e))}</b></span>`;}).join("")}</div>
+    <div class="note">${esc(lab)}. ${t("srcAll")} ${st.lang==="es"?"Premio = bolsa de clase del programa 2026 (y campeón/subcampeón/3.º abierto). No incluye bolsas opcionales.":"Prize = 2026 program class purse (plus open champion/runner-up/third). Optional purses not included."}</div></section>`;}
   const R=ewSorted((x.shooters||[]).filter(p=>p.ew));if(!R.length)return "";
   const awc=(p,k,l)=>((p.ewa||{})[k]||[]).map(c=>{const a=award(c);return `<span class="badge${a.medal?" m"+a.medal:""}" title="${esc(gname(k))} · ${esc(a.label)}"><em>${l}</em><b>${esc(c)}</b></span>`;}).join("");
   const evaw=p=>((p.ev&&p.ev["12"]&&p.ev["12"].aw)||[]).map(c=>badge(c)).join("");
   return `<section class="card" id="eastwest"><h2>${t("ewT")}</h2>${ewSeg()}${ewSortSeg()}<div class="muted small">${ewOrder()==="T"?(st.lang==="es"?"PR, ordenado por el total de 12 GA (Este + Oeste).":"PR, sorted by 12 GA total (East + West)."):ewOrder()==="W"?(st.lang==="es"?"PR, ordenado por Oeste y luego Este.":"PR, sorted by West, then East."):t("ewSort")}</div><div class="ewt" role="table" aria-label="${esc(t("ewT"))}">
-    <span class="hd nm">${t("name")}</span><span class="hd">${t("ewCls")}</span><span class="hd">${t("ewE")}</span><span class="hd">${t("ewW")}</span><span class="hd aw">${t("ewAwH")}</span><span class="hd">12 GA</span>
-    ${R.map(p=>{const sl=isSel(p.nssa),c=sl?" sel":"",a=selA(p.nssa),X=p.ewx||{};return `<span class="nm${c}"${a}>${plink(p.nssa,p.name)}</span><span class="cl${c}"${a}>${esc(X.c||"–")}</span><span class="n${c}"${a}><b>${p.ew[0]}</b><small>${ewPl(X,"E")}</small></span><span class="n${c}"${a}><b>${p.ew[1]}</b><small>${ewPl(X,"W")}</small></span><span class="aw${c}"${a}>${awc(p,"12E",t("ewE1"))}${awc(p,"12W",t("ewW1"))}${evaw(p)}</span><span class="tt${c}"${a}>${p.ev["12"]?p.ev["12"].b:"–"}</span>`;}).join("")}</div>
+    <span class="hd nm">${t("name")}</span><span class="hd">${t("ewCls")}</span><span class="hd">${t("ewE")}</span><span class="hd">${t("ewW")}</span><span class="hd aw">${t("ewAwH")}</span><span class="hd">12 GA</span><span class="hd">$</span>
+    ${R.map(p=>{const sl=isSel(p.nssa),c=sl?" sel":"",a=selA(p.nssa),X=p.ewx||{};return `<span class="nm${c}"${a}>${plink(p.nssa,p.name)}</span><span class="cl${c}"${a}>${esc(X.c||"–")}</span><span class="n${c}"${a}><b>${p.ew[0]}</b><small>${ewPl(X,"E")}</small></span><span class="n${c}"${a}><b>${p.ew[1]}</b><small>${ewPl(X,"W")}</small></span><span class="aw${c}"${a}>${awc(p,"12E",t("ewE1"))}${awc(p,"12W",t("ewW1"))}${evaw(p)}</span><span class="tt${c}"${a}>${p.ev["12"]?p.ev["12"].b:"–"}</span><span class="n${c}"${a}><b>${money(purseOf("12",p.ev["12"]))}</b></span>`;}).join("")}</div>
     <div class="note">${t("ewPlN")}</div><div class="note">${t("ewCap")}. ${t("ewNote")}.</div></section>`;}
 function rankTxt(lab,r,of,tie,b,fp){if(tie&&fp&&fp>=r&&fp<=r+tie)return `${lab}: ${t("soPlace")(b,tie,fp)} ${t("of")} ${of}`;
   return `${lab}: ${r} ${t("of")} ${of}${tie?` (${t("tieAt")(b,tie)})`:""}`;}
