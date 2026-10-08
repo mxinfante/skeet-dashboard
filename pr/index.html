@@ -523,7 +523,7 @@ function fmtDate(a,b){if(!a)return b||"";const o={day:"numeric",month:"short"},L
 function award(code){
   let m;
   const es=t("conc")==="Concurrente";
-  const CN=es?{TS:"Triple Sub (18-39)",SU:"Sub-Sub Senior (40+)",SS:"Sub-Senior (50+)",SR:"Senior (60+)",VT:"Veterano (70+)",SV:"Senior Veteran (80+)",VV:"Super Veteran (90+)",RM:"Militar retirado",ML:"Militar",MV:"Veterano militar",LY:"Damas",SJ:"Sub-Junior",JR:"Junior",CL:"Colegial",FR:"Primer respondedor",WC:"Silla de ruedas",NO:"Novato",PC:"Padre e hijo","2M":"Dos personas"}:{TS:"Triple Sub (18-39)",SU:"Sub-Sub Senior (40+)",SS:"Sub-Senior (50+)",SR:"Senior (60+)",VT:"Veteran (70+)",SV:"Senior Veteran (80+)",VV:"Super Veteran (90+)",RM:"Retired military",ML:"Military",MV:"Military veteran",LY:"Lady",SJ:"Sub-Junior",JR:"Junior",CL:"Collegiate",FR:"First responder",WC:"Wheelchair",NO:"Novice",PC:"Parent-child","2M":"Two-person"};
+  const CN=es?{TS:"Triple Sub (18-39)",SU:"Sub-Sub Senior (40+)",SS:"Sub-Senior (50+)",SR:"Senior (60+)",VT:"Veterano (70+)",SV:"Senior Veteran (80+)",VV:"Super Veteran (90+)",RM:"Militar retirado",ML:"Militar",MV:"Veterano militar",LY:"Damas",SJ:"Sub-Junior",JR:"Junior",CL:"Colegial",FR:"Primer respondedor",WC:"Silla de ruedas",NO:"Novato",PC:"Padre e hijo","2M":"Dos personas",RK:"Rookie"}:{TS:"Triple Sub (18-39)",SU:"Sub-Sub Senior (40+)",SS:"Sub-Senior (50+)",SR:"Senior (60+)",VT:"Veteran (70+)",SV:"Senior Veteran (80+)",VV:"Super Veteran (90+)",RM:"Retired military",ML:"Military",MV:"Military veteran",LY:"Lady",SJ:"Sub-Junior",JR:"Junior",CL:"Collegiate",FR:"First responder",WC:"Wheelchair",NO:"Novice",PC:"Parent-child","2M":"Two-person",RK:"Rookie"};
   const cname=c=>CN[c]||(es?"Concurrente "+c:"Concurrent "+c);
   const ord=n=>es?`${n}.º`:(n%10===1&&n%100!==11?`${n}st`:n%10===2&&n%100!==12?`${n}nd`:n%10===3&&n%100!==13?`${n}rd`:`${n}th`);
   if(/^(CH|RU|3RD)$/.test(code)){const n={CH:1,RU:2,"3RD":3}[code];return{code,medal:n,label:[t("champ"),t("ru"),t("third")][n-1]};}
@@ -637,8 +637,10 @@ function renderTeam(){
   let shown=0;
   for(const k of keys){
     const ps=bands.get(k).sort((a,b)=>totalOf(b).b-totalOf(a).b||a.name.localeCompare(b.name));
-    const lab=k==="~"?(st.group==="class"?t("noClass"):t("noConc")):(st.group==="class"?t("cls")+" "+k:t("conc")+" "+k);
-    h+=`<div class="band">${esc(lab)}<span>${ps.length} ${ps.length===1?t("shooter1"):t("shooters")}</span></div>`;
+    const concLabel=k=>{const a=award(k+"CH");return a&&a.conc===k&&a.label?a.label.replace(/ · .+$/,""):(st.lang==="es"?"Concurrente ":"Concurrent ")+k;};
+    const lab=k==="~"?(st.group==="class"?t("noClass"):t("noConc")):(st.group==="class"?t("cls")+" "+k:concLabel(k));
+    if(st.group==="conc"&&k===keys[0])h+=`<section class="card" id="concurrencias"><h2>${st.lang==="es"?"Por concurrencia":"By concurrent"}</h2><div class="muted small">${t("concNote")}</div><div class="seg ewseg">${keys.filter(x=>x!=="~").map(x=>`<a class="btn" href="#conc-${x}">${esc(concLabel(x))}</a>`).join("")}</div></section>`;
+    h+=`<div class="band" id="${st.group==="conc"?`conc-${k}`:""}">${esc(lab)}<span>${ps.length} ${ps.length===1?t("shooter1"):t("shooters")}</span></div>`;
     const vis=ps.slice(0,Math.max(0,st.limit-shown));shown+=vis.length;
     h+=`<div class="people cards-only">${vis.map(p=>personCard(p,evs,F)).join("")}</div>`;
     h+=`<div class="tablewrap"><div class="hint">${t("swipe")}</div><div class="scroll"><table><colgroup><col class="c-name"><col class="c-city">${evs.map(()=>`<col class="c-ev">`).join("")}<col class="c-aw"></colgroup><thead><tr><th class="l">${t("name")}</th><th class="l">${t("city")}</th>${evs.map(g=>`<th>${esc(gshort(g))}</th>`).join("")}<th class="l">${t("awards")}</th></tr></thead><tbody>
@@ -750,9 +752,10 @@ function ewTable(x){const g=ewGauge();
     <div class="note">${esc(lab)}. ${t("srcAll")}</div></section>`;}
   const R=ewSorted((x.shooters||[]).filter(p=>p.ew));if(!R.length)return "";
   const awc=(p,k,l)=>((p.ewa||{})[k]||[]).map(c=>{const a=award(c);return `<span class="badge${a.medal?" m"+a.medal:""}" title="${esc(gname(k))} · ${esc(a.label)}"><em>${l}</em><b>${esc(c)}</b></span>`;}).join("");
+  const evaw=p=>((p.ev&&p.ev["12"]&&p.ev["12"].aw)||[]).map(c=>badge(c)).join("");
   return `<section class="card" id="eastwest"><h2>${t("ewT")}</h2>${ewSeg()}${ewSortSeg()}<div class="muted small">${ewOrder()==="T"?(st.lang==="es"?"PR, ordenado por el total de 12 GA (Este + Oeste).":"PR, sorted by 12 GA total (East + West)."):ewOrder()==="W"?(st.lang==="es"?"PR, ordenado por Oeste y luego Este.":"PR, sorted by West, then East."):t("ewSort")}</div><div class="ewt" role="table" aria-label="${esc(t("ewT"))}">
     <span class="hd nm">${t("name")}</span><span class="hd">${t("ewCls")}</span><span class="hd">${t("ewE")}</span><span class="hd">${t("ewW")}</span><span class="hd aw">${t("ewAwH")}</span><span class="hd">12 GA</span>
-    ${R.map(p=>{const sl=isSel(p.nssa),c=sl?" sel":"",a=selA(p.nssa),X=p.ewx||{};return `<span class="nm${c}"${a}>${plink(p.nssa,p.name)}</span><span class="cl${c}"${a}>${esc(X.c||"–")}</span><span class="n${c}"${a}><b>${p.ew[0]}</b><small>${ewPl(X,"E")}</small></span><span class="n${c}"${a}><b>${p.ew[1]}</b><small>${ewPl(X,"W")}</small></span><span class="aw${c}"${a}>${awc(p,"12E",t("ewE1"))}${awc(p,"12W",t("ewW1"))}</span><span class="tt${c}"${a}>${p.ev["12"]?p.ev["12"].b:"–"}</span>`;}).join("")}</div>
+    ${R.map(p=>{const sl=isSel(p.nssa),c=sl?" sel":"",a=selA(p.nssa),X=p.ewx||{};return `<span class="nm${c}"${a}>${plink(p.nssa,p.name)}</span><span class="cl${c}"${a}>${esc(X.c||"–")}</span><span class="n${c}"${a}><b>${p.ew[0]}</b><small>${ewPl(X,"E")}</small></span><span class="n${c}"${a}><b>${p.ew[1]}</b><small>${ewPl(X,"W")}</small></span><span class="aw${c}"${a}>${awc(p,"12E",t("ewE1"))}${awc(p,"12W",t("ewW1"))}${evaw(p)}</span><span class="tt${c}"${a}>${p.ev["12"]?p.ev["12"].b:"–"}</span>`;}).join("")}</div>
     <div class="note">${t("ewPlN")}</div><div class="note">${t("ewCap")}. ${t("ewNote")}.</div></section>`;}
 function rankTxt(lab,r,of,tie,b,fp){if(tie&&fp&&fp>=r&&fp<=r+tie)return `${lab}: ${t("soPlace")(b,tie,fp)} ${t("of")} ${of}`;
   return `${lab}: ${r} ${t("of")} ${of}${tie?` (${t("tieAt")(b,tie)})`:""}`;}
