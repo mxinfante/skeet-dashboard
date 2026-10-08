@@ -758,14 +758,15 @@ function money(n){return n?`$${n.toLocaleString("en-US")}`:"–";}
 function purseParts(p){if(!p||!p.ev)return [];return ["12","20","28","410","DBL","HOA","HAA","WM"].map(g=>{const e=p.ev[g];const v=e?purseOf(g,e,classSize({shooters:[p]},g,e.c)):0;return v?{g,v}:null;}).filter(Boolean);}
 function purseTotal(p){return purseParts(p).reduce((s,x)=>s+x.v,0);}
 function concEst(){return {lo:0,hi:0};}
+function half(n){return Math.max(1,Math.round((n||0)*0.5));}
 function ewMoney(p){const x=p&&p.ewx;if(!x)return {E:0,W:0};
-  const side=pair=>{if(!pair)return 0;const pct=(purseBands(pair[1])[pair[0]-1]||0);return Math.round(pair[1]*6*pct/100);};
+  const side=pair=>{if(!pair)return 0;const n=half(pair[1]);const pct=(purseBands(n)[pair[0]-1]||0);return Math.round(n*6*pct/100);};
   return {E:side(x.E),W:side(x.W)};}
 function optClass(p){const fees={12:20,20:10,28:10,410:10,DBL:10,HOA:10};let n=0;if(!p||!p.ev)return 0;
-  for(const [g,fee] of Object.entries(fees)){const e=p.ev[g];if(!e)continue;const size=(e.cls_of)||((CLASSN[g]||{})[e.c]||0);const pct=(purseBands(size)[classPlace(e)-1]||0);n+=Math.round(size*fee*pct/100);}return n;}
+  for(const [g,fee] of Object.entries(fees)){const e=p.ev[g];if(!e)continue;const size=half((e.cls_of)||((CLASSN[g]||{})[e.c]||0));const pct=(purseBands(size)[classPlace(e)-1]||0);n+=Math.round(size*fee*pct/100);}return n;}
 function purseLine(p){const parts=purseParts(p);const es=st.lang==="es";const ew=ewMoney(p);const opt=optClass(p);
   const fixed=parts.map(x=>`${x.g==="410"?".410":x.g} ${money(x.v)}`).join(" · ")||(es?"sin bolsa de clase":"no class purse");
-  return `${fixed} · ${es?"Este/Oeste est.":"East/West est."} ${money(ew.E+ew.W)} · ${es?"Clase opcional est.":"Optional class est."} ${opt?money(opt):"–"} · Oklahoma est. –`+(es?" · Estimado: asume que la jugó y que entró toda la clase. iSkeet no trae las opciones. Rookie es medalla.":" · Estimate: assumes he entered and the whole class entered. iSkeet has no options. Rookie is a medal.");}
+  return `${fixed} · ${es?"Este/Oeste est.":"East/West est."} ${money(ew.E+ew.W)} · ${es?"Clase opcional est.":"Optional class est."} ${opt?money(opt):"–"} · Oklahoma est. –`+(es?" · Estimado: asume que la jugó y que entró el 50% de la clase. iSkeet no trae las opciones. Rookie es medalla.":" · Estimate: assumes he entered and 50% of the class entered. iSkeet has no options. Rookie is a medal.");}
 function ewOrder(){return ["E","W","T"].includes(st.ewsort)?st.ewsort:"E";}
 function ewSortSeg(){if(ewGauge()!=="12")return "";const s=ewOrder();const items=[["T",st.lang==="es"?"Total":"Total"],["E",t("ewE")],["W",t("ewW")]];
   return `<div class="seg ewseg">${items.map(([k,l])=>`<button type="button" class="btn" data-ewsort="${k}" aria-pressed="${s===k?"true":"false"}">${esc(l)}</button>`).join("")}</div>`;}
@@ -775,7 +776,7 @@ function purseBoard(x){const gs=[["12","12"],["20","20"],["28","28"],["410",".41
   const rows=(x.shooters||[]).map(p=>({p,tot:purseTotal(p),ew:ewMoney(p)})).filter(r=>r.tot||r.ew.E||r.ew.W).sort((a,b)=>(b.tot+b.ew.E+b.ew.W)-(a.tot+a.ew.E+a.ew.W)||a.p.name.localeCompare(b.p.name));
   if(!rows.length)return "";
   const es=st.lang==="es";
-  return `<section class="card" id="bolsa"><h2>${es?"Bolsas":"Purses"}</h2><div class="muted small">${es?"La fija es la bolsa de clase. Este, Oeste y clase opcional son estimados: asumen que la jugó y que entró toda la clase ($6 Este/Oeste, $20 opcional en 12, $10 en los demás, no HAA). Oklahoma es high gun y no sale en iSkeet. Rookie es medalla.":"Fixed is the class purse. East, West and optional class are estimates: they assume he entered and the whole class entered. Oklahoma is high gun and is not in iSkeet. Rookie is a medal."}</div>
+  return `<section class="card" id="bolsa"><h2>${es?"Bolsas":"Purses"}</h2><div class="muted small">${es?"La fija es la bolsa de clase. Este, Oeste y clase opcional son estimados: asumen que la jugó y que entró el 50% de la clase o de la concurrente ($6 Este/Oeste, $20 opcional en 12, $10 en los demás, no HAA). Oklahoma es high gun y no sale en iSkeet. Rookie es medalla.":"Fixed is the class purse. East, West and optional class are estimates assuming he entered and 50% of the class or concurrent entered. Oklahoma is high gun and is not in iSkeet. Rookie is a medal."}</div>
     <div class="purses">${rows.map(r=>{const all=r.tot+r.ew.E+r.ew.W+optClass(r.p);return `<article class="prow${isSel(r.p.nssa)?" sel":""}"><div class="prow-h"><b>${plink(r.p.nssa,r.p.name)}</b><b>${money(all)}</b></div><div class="prow-g">${gs.map(([g,l])=>{const e=r.p.ev&&r.p.ev[g];const v=e?purseOf(g,e,classSize(x,g,e.c)):0;return `<span><i>${l}</i>${v?money(v):"–"}</span>`;}).join("")}<span><i>${es?"Este est.":"East est."}</i>${r.ew.E?money(r.ew.E):"–"}</span><span><i>${es?"Oeste est.":"West est."}</i>${r.ew.W?money(r.ew.W):"–"}</span><span><i>${es?"Opcional est.":"Optional est."}</i>${(v=>v?money(v):"–")(optClass(r.p))}</span><span><i>Oklahoma est.</i>–</span></div></article>`;}).join("")}</div></section>`;}
 function ewTable(x){const g=ewGauge();
   if(g!=="12"){const R=(x.shooters||[]).filter(p=>p.ev&&p.ev[g]).sort((a,b)=>b.ev[g].b-a.ev[g].b||a.name.localeCompare(b.name));if(!R.length)return "";
