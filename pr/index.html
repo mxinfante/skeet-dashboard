@@ -730,7 +730,7 @@ function renderFinder(){const P=D.pr.people||[];const letters=[...new Set(P.map(
     <div class="az" role="list" aria-label="A–Z">${letters.map(l=>`<button type="button" class="btn azb" data-az="${l}" aria-pressed="${st.letter===l}">${l}</button>`).join("")}<button type="button" class="btn azb" data-az="*" aria-pressed="${st.letter==="*"}">${t("allAZ")}</button></div>
     <div id="praz">${azRows()}</div>${selBar((personById(SEL())||{}).name)}<div class="note">${P.length} ${t("prShooters")} · ${t("azNote")} · ${t("pickNote")}</div></section>`;}
 function ewChips(ewa){return ["12E","12W"].flatMap(k=>((ewa||{})[k]||[]).map(c=>{const a=award(c);return `<span class="badge${a.medal?" m"+a.medal:""}" title="${esc(a.label)}"><em>${esc(gname(k))}</em>&nbsp;<b>${esc(c)}</b></span>`;})).join("");}
-function ewGauge(){return ["12","20","28","410","DBL"].includes(st.ewg)?st.ewg:"12";}
+function ewGauge(){return ["12","20","28","410","DBL","HOA","HAA"].includes(st.ewg)?st.ewg:"12";}
 function ewSeg(){const g=ewGauge();const items=[["12",t("ewT")],["20","20 ga"],["28","28 ga"],["410",".410"],["DBL",t("dbl")],["HOA","HOA"],["HAA","HAA"]];
   return `<div class="seg ewseg">${items.map(([k,l])=>`<button type="button" class="btn" data-ewg="${k}" aria-pressed="${g===k?"true":"false"}">${esc(l)}</button>`).join("")}</div>`;}
 function ewTile(ew,ewa,ev){const g=ewGauge();
