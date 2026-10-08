@@ -731,7 +731,7 @@ function renderFinder(){const P=D.pr.people||[];const letters=[...new Set(P.map(
     <div id="praz">${azRows()}</div>${selBar((personById(SEL())||{}).name)}<div class="note">${P.length} ${t("prShooters")} · ${t("azNote")} · ${t("pickNote")}</div></section>`;}
 function ewChips(ewa){return ["12E","12W"].flatMap(k=>((ewa||{})[k]||[]).map(c=>{const a=award(c);return `<span class="badge${a.medal?" m"+a.medal:""}" title="${esc(a.label)}"><em>${esc(gname(k))}</em>&nbsp;<b>${esc(c)}</b></span>`;})).join("");}
 function ewGauge(){return ["12","20","28","410","DBL"].includes(st.ewg)?st.ewg:"12";}
-function ewSeg(){const g=ewGauge();const items=[["12",t("ewT")],["20","20 ga"],["28","28 ga"],["410",".410"],["DBL",t("dbl")]];
+function ewSeg(){const g=ewGauge();const items=[["12",t("ewT")],["20","20 ga"],["28","28 ga"],["410",".410"],["DBL",t("dbl")],["HOA","HOA"],["HAA","HAA"]];
   return `<div class="seg ewseg">${items.map(([k,l])=>`<button type="button" class="btn" data-ewg="${k}" aria-pressed="${g===k?"true":"false"}">${esc(l)}</button>`).join("")}</div>`;}
 function ewTile(ew,ewa,ev){const g=ewGauge();
   if(g!=="12"){const e=ev&&ev[g];
@@ -754,6 +754,14 @@ function ewSortSeg(){if(ewGauge()!=="12")return "";const s=ewOrder();const items
   return `<div class="seg ewseg">${items.map(([k,l])=>`<button type="button" class="btn" data-ewsort="${k}" aria-pressed="${s===k?"true":"false"}">${esc(l)}</button>`).join("")}</div>`;}
 function ewSorted(list){const s=ewOrder();const total=p=>p.ev&&p.ev["12"]?p.ev["12"].b:(p.ew[0]+p.ew[1]);
   return list.slice().sort((a,b)=>s==="T"?total(b)-total(a)||a.name.localeCompare(b.name):s==="W"?b.ew[1]-a.ew[1]||b.ew[0]-a.ew[0]||a.name.localeCompare(b.name):b.ew[0]-a.ew[0]||b.ew[1]-a.ew[1]||a.name.localeCompare(b.name));}
+function purseBoard(x){const gs=[["12","12"],["20","20"],["28","28"],["410",".410"],["DBL","DBL"],["HOA","HOA"],["HAA","HAA"]];
+  const rows=(x.shooters||[]).map(p=>({p,tot:purseTotal(p)})).filter(r=>r.tot).sort((a,b)=>b.tot-a.tot||a.p.name.localeCompare(b.p.name));
+  if(!rows.length)return "";
+  const es=st.lang==="es";
+  return `<section class="card" id="bolsa"><h2>${es?"Bolsa total":"Purse total"}</h2><div class="muted small">${es?"Una sola tabla: clase, HOA y HAA. Concurrente es medalla; la bolsa opcional de la pág. 19 no está en iSkeet.":"One table: class, HOA and HAA. Concurrent is a medal; the p.19 optional purse is not in iSkeet."}</div>
+    <div class="tablewrap"><div class="hint">${t("swipe")}</div><div class="scroll"><table><thead><tr><th class="l">${t("name")}</th>${gs.map(([,l])=>`<th>${l}</th>`).join("")}<th>Total</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr${isSel(r.p.nssa)?' class="sel"':""}><td class="l">${plink(r.p.nssa,r.p.name)}</td>${gs.map(([g])=>{const e=r.p.ev&&r.p.ev[g];const v=e?purseOf(g,e,classSize(x,g,e.c)):0;return `<td>${v?money(v):"–"}</td>`;}).join("")}<td><b>${money(r.tot)}</b></td></tr>`).join("")}
+    </tbody></table></div></div></section>`;}
 function ewTable(x){const g=ewGauge();
   if(g!=="12"){const R=(x.shooters||[]).filter(p=>p.ev&&p.ev[g]).sort((a,b)=>b.ev[g].b-a.ev[g].b||a.name.localeCompare(b.name));if(!R.length)return "";
     const lab=gname(g);
@@ -883,7 +891,7 @@ function renderPRSection(x){
   h+=`<section class="card"><div class="grid2">${topL("HOA",t("hoaTop"))}${topL("HAA",t("haaTop"))}</div></section>`;
   // medals: podium + stacked bars + combined table
   h+=`<section class="card" id="medals"><h2>${t("medals")}</h2><div class="muted small">${t("podium")}</div>${podium(x.people)}<h3 style="margin-top:14px">${t("stackT")}</h3>${stacked(x.people,10)}${medalTable(x.people,false)}${(x.side_events||[]).length?`<div class="note">${t("wmNote")}</div>`:""}</section>`;
-  h+=ewTable(x);   // phone-first: right after the medal table
+  h+=purseBoard(x);h+=ewTable(x);   // phone-first: right after the medal table
   // best per gauge
   h+=`<section class="card"><h2>${t("bestG")}</h2><div class="tiles">${["12","20","28","410","DBL"].map(g=>{const rows=x.best[g]||[];if(!rows.length)return "";const b=rows[0];const ties=rows.filter(r=>r.b===b.b);
     return `<div class="tile" style="--gc:${gc(g)}"><div class="en">${esc(gname(g))}</div><div class="sc">${b.b}<small>/${b.t}</small></div><div class="pc">${fmtp(b.pct)}</div>${ties.map(r=>`<div class="small${isSel(r.nssa)?" sel":""}"${selA(r.nssa)}><b>${plink(r.nssa,r.name)}</b>${r.c?` <span class="muted">· ${esc(r.c)}</span>`:""}</div>`).join("")}</div>`;}).join("")}</div></section>`;
