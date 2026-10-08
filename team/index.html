@@ -328,7 +328,9 @@ svg.hist .b1{fill:var(--accent)}
 svg.hist text{fill:var(--muted);font-size:10px;font-weight:600}
 svg.hist .selm{fill:var(--ink)}
 .ewt{display:grid;grid-template-columns:minmax(0,1fr) 40px 74px 74px minmax(84px,auto) 52px;gap:0;margin-top:8px;font-variant-numeric:tabular-nums;max-width:720px}
-.ewt.g5{grid-template-columns:minmax(0,1fr) 40px 78px 92px minmax(84px,auto)}
+.ewt.g5{grid-template-columns:minmax(108px,1.6fr) 32px 56px 46px minmax(0,1fr);max-width:none}
+.ewt.g5>.nm,.ewt.g5>.nm a{white-space:normal;overflow-wrap:anywhere;line-height:1.25}
+.ewt.g5 .badge em{display:none}
 .ewseg{margin:8px 0 4px}
 .ewt>.hd{white-space:nowrap}.ewt>.cl{text-align:center;font-weight:700;color:var(--muted)}.ewt>.hd:nth-child(2){text-align:center}
 .ewt>.n b{display:block}.ewt>.n small{display:block;font-size:11px;font-weight:600;color:var(--muted)}
@@ -733,17 +735,22 @@ function ewTile(ew,ewa,ev){const g=ewGauge();
   if(!ew)return "";const ch=ewChips(ewa);
   return `<div class="tile ew" style="--gc:${gc("12")}"><div class="en">${esc(t("ewT"))}</div><div class="sc" style="white-space:nowrap">${ew[0]} <small>·</small> ${ew[1]}</div><div class="pc">${t("ewE")} · ${t("ewW")} (${t("of2")} 100)</div>${ch?`<div class="badges">${ch}</div>`:""}<div class="rank">${t("ewTileN")}</div>${ewSeg()}</div>`;}
 function ewPl(x,k){const v=x&&x[k];return v?(st.lang==="es"?`${v[0]}.º/${v[1]}`:`${ord(v[0])}/${v[1]}`):t("ewNI");}
+function ewOrder(){return ["E","W","T"].includes(st.ewsort)?st.ewsort:"E";}
+function ewSortSeg(){if(ewGauge()!=="12")return "";const s=ewOrder();const items=[["T",st.lang==="es"?"Total":"Total"],["E",t("ewE")],["W",t("ewW")]];
+  return `<div class="seg ewseg">${items.map(([k,l])=>`<button type="button" class="btn" data-ewsort="${k}" aria-pressed="${s===k?"true":"false"}">${esc(l)}</button>`).join("")}</div>`;}
+function ewSorted(list){const s=ewOrder();const total=p=>p.ev&&p.ev["12"]?p.ev["12"].b:(p.ew[0]+p.ew[1]);
+  return list.slice().sort((a,b)=>s==="T"?total(b)-total(a)||a.name.localeCompare(b.name):s==="W"?b.ew[1]-a.ew[1]||b.ew[0]-a.ew[0]||a.name.localeCompare(b.name):b.ew[0]-a.ew[0]||b.ew[1]-a.ew[1]||a.name.localeCompare(b.name));}
 function ewTable(x){const g=ewGauge();
   if(g!=="12"){const R=(x.shooters||[]).filter(p=>p.ev&&p.ev[g]).sort((a,b)=>b.ev[g].b-a.ev[g].b||a.name.localeCompare(b.name));if(!R.length)return "";
     const lab=gname(g);
     return `<section class="card" id="eastwest"><h2>${esc(lab)}</h2>${ewSeg()}<div class="muted small">${esc(lab)}</div><div class="ewt g5" role="table" aria-label="${esc(lab)}">
     <span class="hd nm">${t("name")}</span><span class="hd">${t("ewCls")}</span><span class="hd">${t("pts")}</span><span class="hd">${t("pos")}</span><span class="hd aw">${t("ewAwH")}</span>
     ${R.map(p=>{const e=p.ev[g],sl=isSel(p.nssa),c=sl?" sel":"",a=selA(p.nssa);const place=e.r?(e.of?`${e.r} ${t("of")} ${e.of}`:String(e.r)):"–";
-      return `<span class="nm${c}"${a}>${plink(p.nssa,p.name)}</span><span class="cl${c}"${a}>${esc(e.c||"–")}</span><span class="n${c}"${a}><b>${e.b}</b><small>/${e.t}</small></span><span class="n${c}"${a}><b>${esc(place)}</b></span><span class="aw${c}"${a}>${(e.aw||[]).map(code=>badge(code,true)).join("")}</span>`;}).join("")}</div>
+      return `<span class="nm${c}"${a}>${plink(p.nssa,p.name)}</span><span class="cl${c}"${a}>${esc(e.c||"–")}</span><span class="n${c}"${a}><b>${e.b}</b><small>/${e.t}</small></span><span class="n${c}"${a}><b>${esc(place)}</b></span><span class="aw${c}"${a}>${(e.aw||[]).map(code=>badge(code,true).replace(/<em>[^<]*<\/em>/g,"")).join("")}</span>`;}).join("")}</div>
     <div class="note">${esc(lab)}. ${t("srcAll")}</div></section>`;}
-  const R=(x.shooters||[]).filter(p=>p.ew).sort((a,b)=>b.ew[0]-a.ew[0]||b.ew[1]-a.ew[1]||a.name.localeCompare(b.name));if(!R.length)return "";
+  const R=ewSorted((x.shooters||[]).filter(p=>p.ew));if(!R.length)return "";
   const awc=(p,k,l)=>((p.ewa||{})[k]||[]).map(c=>{const a=award(c);return `<span class="badge${a.medal?" m"+a.medal:""}" title="${esc(gname(k))} · ${esc(a.label)}"><em>${l}</em><b>${esc(c)}</b></span>`;}).join("");
-  return `<section class="card" id="eastwest"><h2>${t("ewT")}</h2>${ewSeg()}<div class="muted small">${t("ewSort")}</div><div class="ewt" role="table" aria-label="${esc(t("ewT"))}">
+  return `<section class="card" id="eastwest"><h2>${t("ewT")}</h2>${ewSeg()}${ewSortSeg()}<div class="muted small">${ewOrder()==="T"?(st.lang==="es"?"PR, ordenado por el total de 12 GA (Este + Oeste).":"PR, sorted by 12 GA total (East + West)."):ewOrder()==="W"?(st.lang==="es"?"PR, ordenado por Oeste y luego Este.":"PR, sorted by West, then East."):t("ewSort")}</div><div class="ewt" role="table" aria-label="${esc(t("ewT"))}">
     <span class="hd nm">${t("name")}</span><span class="hd">${t("ewCls")}</span><span class="hd">${t("ewE")}</span><span class="hd">${t("ewW")}</span><span class="hd aw">${t("ewAwH")}</span><span class="hd">12 GA</span>
     ${R.map(p=>{const sl=isSel(p.nssa),c=sl?" sel":"",a=selA(p.nssa),X=p.ewx||{};return `<span class="nm${c}"${a}>${plink(p.nssa,p.name)}</span><span class="cl${c}"${a}>${esc(X.c||"–")}</span><span class="n${c}"${a}><b>${p.ew[0]}</b><small>${ewPl(X,"E")}</small></span><span class="n${c}"${a}><b>${p.ew[1]}</b><small>${ewPl(X,"W")}</small></span><span class="aw${c}"${a}>${awc(p,"12E",t("ewE1"))}${awc(p,"12W",t("ewW1"))}</span><span class="tt${c}"${a}>${p.ev["12"]?p.ev["12"].b:"–"}</span>`;}).join("")}</div>
     <div class="note">${t("ewPlN")}</div><div class="note">${t("ewCap")}. ${t("ewNote")}.</div></section>`;}
@@ -792,7 +799,7 @@ function fieldView(id){const C=fvFor(id);if(!C)return "";
     <div class="note" id="fvx" data-x="${S.x}" style="margin-top:10px">${S.x?esc(t("fvX").replace("N",num(S.x))):esc(t("fvX0"))}. ${esc(t("fvTap"))} ${esc(t(S.x?"fvSrc":"fvSrc0"))}</div></section>`;}
 function fvRefresh(){const el=document.getElementById("fv");if(!el)return;const sy=window.scrollY;el.outerHTML=fieldView(el.dataset.fvid);window.scrollTo(0,sy);}
 if(PAGE==="pr"||PAGE==="team"){
-  document.addEventListener("click",e=>{const eg=e.target.closest&&e.target.closest("[data-ewg]");if(eg){st.ewg=eg.dataset.ewg;const y=window.scrollY;if(typeof render==="function")render();window.scrollTo(0,y);return;}});
+  document.addEventListener("click",e=>{const eg=e.target.closest&&e.target.closest("[data-ewg],[data-ewsort]");if(eg){if(eg.dataset.ewg)st.ewg=eg.dataset.ewg;if(eg.dataset.ewsort)st.ewsort=eg.dataset.ewsort;const y=window.scrollY;if(typeof render==="function")render();window.scrollTo(0,y);return;}});
   document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("#fv [data-fvg],#fv [data-fvk]");if(!b)return;
     if(b.dataset.fvg){st.fvg=b.dataset.fvg;st.fvk=null;}else{const k=b.dataset.fvk;st.fvk=st.fvk===k?null:k;}fvRefresh();});
   document.addEventListener("keydown",e=>{if(e.key!=="Enter"&&e.key!==" ")return;const g=e.target.closest&&e.target.closest("#fv g[data-fvk]");if(!g)return;e.preventDefault();
