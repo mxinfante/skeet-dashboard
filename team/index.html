@@ -126,6 +126,15 @@ svg.trend .base{stroke:var(--line)}
 .youtag{font-size:11px;font-weight:800;background:var(--gold-bg);color:var(--gold-ink);border:1px solid var(--gold-line);border-radius:999px;padding:1px 7px;margin-left:6px;vertical-align:middle}
 /* desktop table */
 .tablewrap{display:none}
+.purses{display:grid;gap:8px;margin-top:10px}
+.prow{border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.prow.sel{background:var(--me);border-color:var(--me-line)}
+.prow-h{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.prow-h b:first-child{overflow-wrap:anywhere}
+.prow-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 10px;margin-top:6px;font-variant-numeric:tabular-nums}
+.prow-g span{display:flex;justify-content:space-between;gap:6px;min-width:0}
+.prow-g i{font-style:normal;color:var(--muted);font-size:12px}
+@media (max-width:560px){.prow-g{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .hint{display:none;font-size:12px;color:var(--muted);margin:4px 0}
 .hint.on{display:block}
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px}
@@ -749,20 +758,24 @@ function money(n){return n?`$${n.toLocaleString("en-US")}`:"–";}
 function purseParts(p){if(!p||!p.ev)return [];return ["12","20","28","410","DBL","HOA","HAA","WM"].map(g=>{const e=p.ev[g];const v=e?purseOf(g,e,classSize({shooters:[p]},g,e.c)):0;return v?{g,v}:null;}).filter(Boolean);}
 function purseTotal(p){return purseParts(p).reduce((s,x)=>s+x.v,0);}
 function concEst(){return {lo:0,hi:0};}
-function purseLine(p){const parts=purseParts(p);const es=st.lang==="es";const c=concEst(p);return (parts.map(x=>`${x.g==="410"?".410":x.g} ${money(x.v)}`).join(" · ")||(es?"sin bolsa de clase":"no class purse"))+(es?" · Rookie: medalla, sin bolsa (programa pág. 17).":" · Rookie: medal, no purse (program p. 17).");}
+function ewMoney(p){const x=p&&p.ewx;if(!x)return {E:0,W:0};
+  const side=pair=>{if(!pair)return 0;const pct=(purseBands(pair[1])[pair[0]-1]||0);return Math.round(pair[1]*6*pct/100);};
+  return {E:side(x.E),W:side(x.W)};}
+function purseLine(p){const parts=purseParts(p);const es=st.lang==="es";const ew=ewMoney(p);
+  const fixed=parts.map(x=>`${x.g==="410"?".410":x.g} ${money(x.v)}`).join(" · ")||(es?"sin bolsa de clase":"no class purse");
+  const sides=`${es?"Este":"East"} ${ew.E?money(ew.E):"–"} · ${es?"Oeste":"West"} ${ew.W?money(ew.W):"–"}`;
+  return `${fixed} · ${sides}`+(es?" · Clase opcional y Oklahoma: no constan en iSkeet (programa pág. 19). Rookie: medalla.":" · Optional class and Oklahoma are not in iSkeet (program p. 19). Rookie: medal.");}
 function ewOrder(){return ["E","W","T"].includes(st.ewsort)?st.ewsort:"E";}
 function ewSortSeg(){if(ewGauge()!=="12")return "";const s=ewOrder();const items=[["T",st.lang==="es"?"Total":"Total"],["E",t("ewE")],["W",t("ewW")]];
   return `<div class="seg ewseg">${items.map(([k,l])=>`<button type="button" class="btn" data-ewsort="${k}" aria-pressed="${s===k?"true":"false"}">${esc(l)}</button>`).join("")}</div>`;}
 function ewSorted(list){const s=ewOrder();const total=p=>p.ev&&p.ev["12"]?p.ev["12"].b:(p.ew[0]+p.ew[1]);
   return list.slice().sort((a,b)=>s==="T"?total(b)-total(a)||a.name.localeCompare(b.name):s==="W"?b.ew[1]-a.ew[1]||b.ew[0]-a.ew[0]||a.name.localeCompare(b.name):b.ew[0]-a.ew[0]||b.ew[1]-a.ew[1]||a.name.localeCompare(b.name));}
 function purseBoard(x){const gs=[["12","12"],["20","20"],["28","28"],["410",".410"],["DBL","DBL"],["HOA","HOA"],["HAA","HAA"]];
-  const rows=(x.shooters||[]).map(p=>({p,tot:purseTotal(p)})).filter(r=>r.tot).sort((a,b)=>b.tot-a.tot||a.p.name.localeCompare(b.p.name));
+  const rows=(x.shooters||[]).map(p=>({p,tot:purseTotal(p),ew:ewMoney(p)})).filter(r=>r.tot||r.ew.E||r.ew.W).sort((a,b)=>(b.tot+b.ew.E+b.ew.W)-(a.tot+a.ew.E+a.ew.W)||a.p.name.localeCompare(b.p.name));
   if(!rows.length)return "";
   const es=st.lang==="es";
-  return `<section class="card" id="bolsa"><h2>${es?"Bolsa total":"Purse total"}</h2><div class="muted small">${es?"Clase, HOA y HAA son la bolsa fija. Programa pág. 17: rookie es medalla (campeón, subcampeón y tercero), no bolsa garantizada. La bolsa concurrente de la pág. 19 es opcional y iSkeet no la muestra pagada. En 12 hay 3 rookies.":"One table: class, HOA and HAA. Concurrent is a medal; the p.19 optional purse is not in iSkeet."}</div>
-    <div class="tablewrap"><div class="hint">${t("swipe")}</div><div class="scroll"><table><thead><tr><th class="l">${t("name")}</th>${gs.map(([,l])=>`<th>${l}</th>`).join("")}<th>Total</th><th>${st.lang==="es"?"Conc. est.":"Conc. est."}</th></tr></thead><tbody>
-    ${rows.map(r=>`<tr${isSel(r.p.nssa)?' class="sel"':""}><td class="l">${plink(r.p.nssa,r.p.name)}</td>${gs.map(([g])=>{const e=r.p.ev&&r.p.ev[g];const v=e?purseOf(g,e,classSize(x,g,e.c)):0;return `<td>${v?money(v):"–"}</td>`;}).join("")}<td><b>${money(r.tot)}</b></td><td>–</td></tr>`).join("")}
-    </tbody></table></div></div></section>`;}
+  return `<section class="card" id="bolsa"><h2>${es?"Bolsas":"Purses"}</h2><div class="muted small">${es?"Fija: clase del programa. Este y Oeste: entrada de $6, misma tabla de clase. Clase opcional ($20 en 12, $10 en los demás) y Oklahoma ($30 en 12, $15 en los demás, no HOA) son de la pág. 19 y no constan en iSkeet. Rookie es medalla.":"Fixed class purse. East and West use the $6 entry and the class table. Optional class and Oklahoma are on p. 19 and are not in iSkeet. Rookie is a medal."}</div>
+    <div class="purses">${rows.map(r=>{const all=r.tot+r.ew.E+r.ew.W;return `<article class="prow${isSel(r.p.nssa)?" sel":""}"><div class="prow-h"><b>${plink(r.p.nssa,r.p.name)}</b><b>${money(all)}</b></div><div class="prow-g">${gs.map(([g,l])=>{const e=r.p.ev&&r.p.ev[g];const v=e?purseOf(g,e,classSize(x,g,e.c)):0;return `<span><i>${l}</i>${v?money(v):"–"}</span>`;}).join("")}<span><i>${es?"Este":"East"}</i>${r.ew.E?money(r.ew.E):"–"}</span><span><i>${es?"Oeste":"West"}</i>${r.ew.W?money(r.ew.W):"–"}</span><span><i>${es?"Opcional":"Optional"}</i>–</span><span><i>Oklahoma</i>–</span></div></article>`;}).join("")}</div></section>`;}
 function ewTable(x){const g=ewGauge();
   if(g!=="12"){const R=(x.shooters||[]).filter(p=>p.ev&&p.ev[g]).sort((a,b)=>b.ev[g].b-a.ev[g].b||a.name.localeCompare(b.name));if(!R.length)return "";
     const lab=gname(g);
