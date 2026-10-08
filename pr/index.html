@@ -759,15 +759,13 @@ function purseParts(p){if(!p||!p.ev)return [];return ["12","20","28","410","DBL"
 function purseTotal(p){return purseParts(p).reduce((s,x)=>s+x.v,0);}
 function concEst(){return {lo:0,hi:0};}
 function half(n){return Math.max(1,Math.round((n||0)*0.5));}
-function ewMoney(p){const x=p&&p.ewx;if(!x)return {E:0,W:0};
-  const side=pair=>{if(!pair)return 0;const n=half(pair[1]);const pct=(purseBands(n)[pair[0]-1]||0);return Math.round(n*6*pct/100);};
-  return {E:side(x.E),W:side(x.W)};}
+function ewMoney(){return {E:0,W:0};}
 function okMoney(p){if(!p||!/LUIS CRESPO ORTIZ/.test(p.name||""))return 0;const n=half(549);return Math.round(n*15*(purseBands(n)[0]||0)/100);}
 function optClass(p){const fees={12:20,20:10,28:10,410:10,DBL:10,HOA:10};let n=0;if(!p||!p.ev)return 0;
   for(const [g,fee] of Object.entries(fees)){const e=p.ev[g];if(!e)continue;const size=half((e.cls_of)||((CLASSN[g]||{})[e.c]||0));const pct=(purseBands(size)[classPlace(e)-1]||0);n+=Math.round(size*fee*pct/100);}return n;}
 function purseLine(p){const parts=purseParts(p);const es=st.lang==="es";const ew=ewMoney(p);const opt=optClass(p);
   const fixed=parts.map(x=>`${x.g==="410"?".410":x.g} ${money(x.v)}`).join(" · ")||(es?"sin bolsa de clase":"no class purse");
-  const ok=okMoney(p);return `${fixed} · ${es?"Este/Oeste est.":"East/West est."} ${money(ew.E+ew.W)} · ${es?"Clase opcional est.":"Optional class est."} ${opt?money(opt):"–"} · Oklahoma est. ${ok?money(ok):"–"}`+(es?" · Estimado al 50% de la clase o del evento. Luis jugó Oklahoma en todos los calibres y lo ganó en 20; también jugó los concurrentes de Este y Oeste.":" · Estimate at 50% of the class or event. Luis played Oklahoma in every gauge and won 20; he also played the East and West concurrents.");}
+  const ok=okMoney(p);return `${fixed} · ${es?"Clase opcional est.":"Optional class est."} ${opt?money(opt):"–"} · Oklahoma est. ${ok?money(ok):"–"}`+(es?" · Este y Oeste no pagan: los $6 son la cuota de $4+$2 por 100 blancos. El pago es el de los 200.":" · East and West do not pay: the $6 is the $4+$2 fee per 100 targets. The purse is on the 200.");}
 function ewOrder(){return ["E","W","T"].includes(st.ewsort)?st.ewsort:"E";}
 function ewSortSeg(){if(ewGauge()!=="12")return "";const s=ewOrder();const items=[["T",st.lang==="es"?"Total":"Total"],["E",t("ewE")],["W",t("ewW")]];
   return `<div class="seg ewseg">${items.map(([k,l])=>`<button type="button" class="btn" data-ewsort="${k}" aria-pressed="${s===k?"true":"false"}">${esc(l)}</button>`).join("")}</div>`;}
@@ -777,8 +775,8 @@ function purseBoard(x){const gs=[["12","12"],["20","20"],["28","28"],["410",".41
   const rows=(x.shooters||[]).map(p=>({p,tot:purseTotal(p),ew:ewMoney(p)})).filter(r=>r.tot||r.ew.E||r.ew.W).sort((a,b)=>(b.tot+b.ew.E+b.ew.W)-(a.tot+a.ew.E+a.ew.W)||a.p.name.localeCompare(b.p.name));
   if(!rows.length)return "";
   const es=st.lang==="es";
-  return `<section class="card" id="bolsa"><h2>${es?"Bolsas":"Purses"}</h2><div class="muted small">${es?"Estimado al 50% de la clase o del evento. Luis Crespo jugó Oklahoma en todos los calibres y lo ganó en 20 ($15, high gun). También jugó los concurrentes de Este y Oeste. iSkeet no publica la lista de opciones. Rookie es medalla.":"Estimate at 50% of the class or event. Luis Crespo played Oklahoma in every gauge and won 20. He also played the East and West concurrents. iSkeet does not publish the option list. Rookie is a medal."}</div>
-    <div class="purses">${rows.map(r=>{const all=r.tot+r.ew.E+r.ew.W+optClass(r.p)+okMoney(r.p);return `<article class="prow${isSel(r.p.nssa)?" sel":""}"><div class="prow-h"><b>${plink(r.p.nssa,r.p.name)}</b><b>${money(all)}</b></div><div class="prow-g">${gs.map(([g,l])=>{const e=r.p.ev&&r.p.ev[g];const v=e?purseOf(g,e,classSize(x,g,e.c)):0;return `<span><i>${l}</i>${v?money(v):"–"}</span>`;}).join("")}<span><i>${es?"Este est.":"East est."}</i>${r.ew.E?money(r.ew.E):"–"}</span><span><i>${es?"Oeste est.":"West est."}</i>${r.ew.W?money(r.ew.W):"–"}</span><span><i>${es?"Opcional est.":"Optional est."}</i>${(v=>v?money(v):"–")(optClass(r.p))}</span><span><i>Oklahoma est.</i>${(v=>v?money(v):"–")(okMoney(r.p))}</span></div></article>`;}).join("")}</div></section>`;}
+  return `<section class="card" id="bolsa"><h2>${es?"Bolsas":"Purses"}</h2><div class="muted small">${es?"Este y Oeste no pagan bolsa. En la tabla de cuotas los $6 son la tarifa de blanco y mantenimiento, $4+$2 por 100. El pago de 12 es el de los 200. La opcional sigue estimada al 50% de la clase.":"East and West pay no purse. The $6 is the target and maintenance fee, $4+$2 per 100. The 12-gauge purse is on the 200. Optional class stays estimated at 50% of the class."}</div>
+    <div class="purses">${rows.map(r=>{const all=r.tot+r.ew.E+r.ew.W+optClass(r.p)+okMoney(r.p);return `<article class="prow${isSel(r.p.nssa)?" sel":""}"><div class="prow-h"><b>${plink(r.p.nssa,r.p.name)}</b><b>${money(all)}</b></div><div class="prow-g">${gs.map(([g,l])=>{const e=r.p.ev&&r.p.ev[g];const v=e?purseOf(g,e,classSize(x,g,e.c)):0;return `<span><i>${l}</i>${v?money(v):"–"}</span>`;}).join("")}<span><i>${es?"Este":"East"}</i>–</span><span><i>${es?"Oeste":"West"}</i>–</span><span><i>${es?"Opcional est.":"Optional est."}</i>${(v=>v?money(v):"–")(optClass(r.p))}</span><span><i>Oklahoma est.</i>${(v=>v?money(v):"–")(okMoney(r.p))}</span></div></article>`;}).join("")}</div></section>`;}
 function ewTable(x){const g=ewGauge();
   if(g!=="12"){const R=(x.shooters||[]).filter(p=>p.ev&&p.ev[g]).sort((a,b)=>b.ev[g].b-a.ev[g].b||a.name.localeCompare(b.name));if(!R.length)return "";
     const lab=gname(g);
