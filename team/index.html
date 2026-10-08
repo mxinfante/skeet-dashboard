@@ -328,6 +328,8 @@ svg.hist .b1{fill:var(--accent)}
 svg.hist text{fill:var(--muted);font-size:10px;font-weight:600}
 svg.hist .selm{fill:var(--ink)}
 .ewt{display:grid;grid-template-columns:minmax(0,1fr) 40px 74px 74px minmax(84px,auto) 52px;gap:0;margin-top:8px;font-variant-numeric:tabular-nums;max-width:720px}
+.ewt.g5{grid-template-columns:minmax(0,1fr) 40px 78px 92px minmax(84px,auto)}
+.ewseg{margin:8px 0 4px}
 .ewt>.hd{white-space:nowrap}.ewt>.cl{text-align:center;font-weight:700;color:var(--muted)}.ewt>.hd:nth-child(2){text-align:center}
 .ewt>.n b{display:block}.ewt>.n small{display:block;font-size:11px;font-weight:600;color:var(--muted)}
 .ewt>.aw{display:flex;flex-wrap:wrap;gap:3px;align-content:flex-start;justify-content:flex-end}.ewt>.aw .badge{font-size:11px;padding:1px 6px;flex-direction:row;align-items:center;gap:4px;white-space:nowrap}.ewt>.hd.aw{display:block;text-align:right}
@@ -503,7 +505,7 @@ const PAGE="team";
 function getLang(){const q=new URLSearchParams(location.search).get("lang");if(q==="es"||q==="en"){try{localStorage.setItem("skeet_lang",q);}catch(e){}return q;}
   try{const l=localStorage.getItem("skeet_lang");if(l==="es"||l==="en")return l;}catch(e){}return "es";}
 function setLang(l){try{localStorage.setItem("skeet_lang",l);}catch(e){}}
-const st={lang:getLang(),ti:0,filter:"team",group:"class",q:"",limit:60};
+const st={lang:getLang(),ti:0,filter:"team",group:"class",q:"",limit:60,ewg:"12"};
 const t=k=>T[st.lang][k];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const GAUGES=["12","20","28","410","DBL"];
@@ -721,12 +723,27 @@ function renderFinder(){const P=D.pr.people||[];const letters=[...new Set(P.map(
     <div class="az" role="list" aria-label="A–Z">${letters.map(l=>`<button type="button" class="btn azb" data-az="${l}" aria-pressed="${st.letter===l}">${l}</button>`).join("")}<button type="button" class="btn azb" data-az="*" aria-pressed="${st.letter==="*"}">${t("allAZ")}</button></div>
     <div id="praz">${azRows()}</div>${selBar((personById(SEL())||{}).name)}<div class="note">${P.length} ${t("prShooters")} · ${t("azNote")} · ${t("pickNote")}</div></section>`;}
 function ewChips(ewa){return ["12E","12W"].flatMap(k=>((ewa||{})[k]||[]).map(c=>{const a=award(c);return `<span class="badge${a.medal?" m"+a.medal:""}" title="${esc(a.label)}"><em>${esc(gname(k))}</em>&nbsp;<b>${esc(c)}</b></span>`;})).join("");}
-function ewTile(ew,ewa){if(!ew)return "";const ch=ewChips(ewa);
-  return `<div class="tile ew" style="--gc:${gc("12")}"><div class="en">${esc(t("ewT"))}</div><div class="sc" style="white-space:nowrap">${ew[0]} <small>·</small> ${ew[1]}</div><div class="pc">${t("ewE")} · ${t("ewW")} (${t("of2")} 100)</div>${ch?`<div class="badges">${ch}</div>`:""}<div class="rank">${t("ewTileN")}</div></div>`;}
+function ewGauge(){return ["12","20","28","410","DBL"].includes(st.ewg)?st.ewg:"12";}
+function ewSeg(){const g=ewGauge();const items=[["12",t("ewT")],["20","20 ga"],["28","28 ga"],["410",".410"],["DBL",t("dbl")]];
+  return `<div class="seg ewseg">${items.map(([k,l])=>`<button type="button" class="btn" data-ewg="${k}" aria-pressed="${g===k?"true":"false"}">${esc(l)}</button>`).join("")}</div>`;}
+function ewTile(ew,ewa,ev){const g=ewGauge();
+  if(g!=="12"){const e=ev&&ev[g];
+    if(!e)return `<div class="tile ew" style="--gc:${gc(g)}"><div class="en">${esc(gname(g))}</div><div class="pc">${t("noshoot")}</div>${ewSeg()}</div>`;
+    return `<div class="tile ew" style="--gc:${gc(g)}">${pTile(g,e,false).replace(/^<div class="tile[^"]*"[^>]*>/,"").replace(/<\/div>$/,"")}${ewSeg()}</div>`;}
+  if(!ew)return "";const ch=ewChips(ewa);
+  return `<div class="tile ew" style="--gc:${gc("12")}"><div class="en">${esc(t("ewT"))}</div><div class="sc" style="white-space:nowrap">${ew[0]} <small>·</small> ${ew[1]}</div><div class="pc">${t("ewE")} · ${t("ewW")} (${t("of2")} 100)</div>${ch?`<div class="badges">${ch}</div>`:""}<div class="rank">${t("ewTileN")}</div>${ewSeg()}</div>`;}
 function ewPl(x,k){const v=x&&x[k];return v?(st.lang==="es"?`${v[0]}.º/${v[1]}`:`${ord(v[0])}/${v[1]}`):t("ewNI");}
-function ewTable(x){const R=(x.shooters||[]).filter(p=>p.ew).sort((a,b)=>b.ew[0]-a.ew[0]||b.ew[1]-a.ew[1]||a.name.localeCompare(b.name));if(!R.length)return "";
+function ewTable(x){const g=ewGauge();
+  if(g!=="12"){const R=(x.shooters||[]).filter(p=>p.ev&&p.ev[g]).sort((a,b)=>b.ev[g].b-a.ev[g].b||a.name.localeCompare(b.name));if(!R.length)return "";
+    const lab=gname(g);
+    return `<section class="card" id="eastwest"><h2>${esc(lab)}</h2>${ewSeg()}<div class="muted small">${esc(lab)}</div><div class="ewt g5" role="table" aria-label="${esc(lab)}">
+    <span class="hd nm">${t("name")}</span><span class="hd">${t("ewCls")}</span><span class="hd">${t("pts")}</span><span class="hd">${t("pos")}</span><span class="hd aw">${t("ewAwH")}</span>
+    ${R.map(p=>{const e=p.ev[g],sl=isSel(p.nssa),c=sl?" sel":"",a=selA(p.nssa);const place=e.r?`${e.r} ${t("of")} ${e.of||"–"}`:"–";
+      return `<span class="nm${c}"${a}>${plink(p.nssa,p.name)}</span><span class="cl${c}"${a}>${esc(e.c||"–")}</span><span class="n${c}"${a}><b>${e.b}</b><small>/${e.t}</small></span><span class="n${c}"${a}><b>${esc(place)}</b></span><span class="aw${c}"${a}>${(e.aw||[]).map(code=>badge(code,true)).join("")}</span>`;}).join("")}</div>
+    <div class="note">${esc(lab)}. ${t("srcAll")}</div></section>`;}
+  const R=(x.shooters||[]).filter(p=>p.ew).sort((a,b)=>b.ew[0]-a.ew[0]||b.ew[1]-a.ew[1]||a.name.localeCompare(b.name));if(!R.length)return "";
   const awc=(p,k,l)=>((p.ewa||{})[k]||[]).map(c=>{const a=award(c);return `<span class="badge${a.medal?" m"+a.medal:""}" title="${esc(gname(k))} · ${esc(a.label)}"><em>${l}</em><b>${esc(c)}</b></span>`;}).join("");
-  return `<section class="card" id="eastwest"><h2>${t("ewT")}</h2><div class="muted small">${t("ewSort")}</div><div class="ewt" role="table" aria-label="${esc(t("ewT"))}">
+  return `<section class="card" id="eastwest"><h2>${t("ewT")}</h2>${ewSeg()}<div class="muted small">${t("ewSort")}</div><div class="ewt" role="table" aria-label="${esc(t("ewT"))}">
     <span class="hd nm">${t("name")}</span><span class="hd">${t("ewCls")}</span><span class="hd">${t("ewE")}</span><span class="hd">${t("ewW")}</span><span class="hd aw">${t("ewAwH")}</span><span class="hd">12 GA</span>
     ${R.map(p=>{const sl=isSel(p.nssa),c=sl?" sel":"",a=selA(p.nssa),X=p.ewx||{};return `<span class="nm${c}"${a}>${plink(p.nssa,p.name)}</span><span class="cl${c}"${a}>${esc(X.c||"–")}</span><span class="n${c}"${a}><b>${p.ew[0]}</b><small>${ewPl(X,"E")}</small></span><span class="n${c}"${a}><b>${p.ew[1]}</b><small>${ewPl(X,"W")}</small></span><span class="aw${c}"${a}>${awc(p,"12E",t("ewE1"))}${awc(p,"12W",t("ewW1"))}</span><span class="tt${c}"${a}>${p.ev["12"]?p.ev["12"].b:"–"}</span>`;}).join("")}</div>
     <div class="note">${t("ewPlN")}</div><div class="note">${t("ewCap")}. ${t("ewNote")}.</div></section>`;}
@@ -775,6 +792,7 @@ function fieldView(id){const C=fvFor(id);if(!C)return "";
     <div class="note" id="fvx" data-x="${S.x}" style="margin-top:10px">${S.x?esc(t("fvX").replace("N",num(S.x))):esc(t("fvX0"))}. ${esc(t("fvTap"))} ${esc(t(S.x?"fvSrc":"fvSrc0"))}</div></section>`;}
 function fvRefresh(){const el=document.getElementById("fv");if(!el)return;const sy=window.scrollY;el.outerHTML=fieldView(el.dataset.fvid);window.scrollTo(0,sy);}
 if(PAGE==="pr"||PAGE==="team"){
+  document.addEventListener("click",e=>{const eg=e.target.closest&&e.target.closest("[data-ewg]");if(eg){st.ewg=eg.dataset.ewg;const y=window.scrollY;if(typeof render==="function")render();window.scrollTo(0,y);return;}});
   document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("#fv [data-fvg],#fv [data-fvk]");if(!b)return;
     if(b.dataset.fvg){st.fvg=b.dataset.fvg;st.fvk=null;}else{const k=b.dataset.fvk;st.fvk=st.fvk===k?null:k;}fvRefresh();});
   document.addEventListener("keydown",e=>{if(e.key!=="Enter"&&e.key!==" ")return;const g=e.target.closest&&e.target.closest("#fv g[data-fvk]");if(!g)return;e.preventDefault();
@@ -790,7 +808,7 @@ function renderShooter(p){
 </section>`;
   for(const s of secs){const d=p.shoots[s.slug],E=d.ev;
     h+=`<section class="card pcs"><div class="sh-head"><div class="t"><h2>${esc(st.lang==="es"?s.tab_es:s.tab_en)}</h2><div class="muted small">${esc(s.name)} · ${esc(fmtDate(s.start,s.end))}</div></div><span class="pill ok">✓ ${t("official")}</span></div>
-      <div class="tiles">${["HOA","HAA"].map(g=>pTile(g,E[g],true)).join("")}${GAUGES.map(g=>pTile(g,E[g],false)+(g==="12"?ewTile(d.ew,d.ewa):"")).join("")}${pTile("WM",E.WM,false)}</div>${d.ew?`<div class="note">${t("ewCap")}. ${t("ewNote")}.</div>`:""}`;
+      <div class="tiles">${["HOA","HAA"].map(g=>pTile(g,E[g],true)).join("")}${GAUGES.map(g=>(g!=="12"&&g===ewGauge()?"":pTile(g,E[g],false))+(g==="12"?ewTile(d.ew,d.ewa,E):"")).join("")}${pTile("WM",E.WM,false)}</div>${d.ew?`<div class="note">${t("ewCap")}. ${t("ewNote")}.</div>`:""}`;
     if(d.squads==null)h+=`<div class="note">${t("sqNAshooter")}</div>`;
     else if(!d.squads.length)h+=`<div class="note">${t("sqNone")}</div>`;
     else h+=`<h3 style="margin-top:12px">${t("sqDay")}</h3><div class="sched">${d.squads.map(z=>{const [wd,dm]=dayLab(z.day);return `<div class="srow"><div class="d">${esc(wd)}<small>${esc(dm)}</small></div><div><div class="e">${esc(EVN(z.event))}</div><div class="kv"><span>${t("sq")} <b>${esc(z.squad)}</b>${z.pos?` · ${t("posn")} ${esc(z.pos)}`:""}</span><span>${t("time")} <b>${esc(z.time?fmtTime(z.time):"–")}</b>${z.derived?`<span class="der">${t("wDer")}</span>`:""}</span>${z.field?`<span>${t("fieldN")} <b>${esc(z.field)}</b></span>`:""}</div></div></div>`;}).join("")}</div><div class="note">${t("sqSrc")}</div>${d.squads.some(z=>z.derived)?`<div class="note">${t("wSrc")}</div>`:""}`;
